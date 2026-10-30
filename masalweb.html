@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<!--
+DOSYA HARİTASI — BİR MASAL, BİN HAYAL
+1. <head>: sayfa bilgileri ve <style> içindeki bütün CSS kuralları
+2. Gizli SVG görsel deposu: kilim bordürü, ortak motifler ve 8 özgün masal resmi
+3. #ana-sayfa: kapak, arama, kategoriler, kartlar ve en alttaki kaynakça
+4. #masal-gorunumu: aynı dosya içindeki masal okuma ekranı
+5. <script>: önce kategoriler ve masallar dizisi, sonra küçük JavaScript işlevleri
+6. Dosyanın en sonunda: görsel ve metin değiştirme kılavuzu
+Bu dosyanın çalışması için internet, ek dosya veya kütüphane gerekmez.
+-->
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Sekiz Türk masalını renkli, özgün çizimlerle buluşturan dijital masal arşivi.">
+  <title>Bir Masal, Bin Hayal | Dijital Masal Arşivi</title>
+  <style>
+    /* ========== 1. TEMEL DEĞİŞKENLER VE GENEL KURALLAR ========== */
+    :root {
+      --krem: #F8F1E3; --kagit: #FFFCF5; --murdum: #4B1D3F;
+      --kahve: #5E3B25; --kiremit: #B5573B; --kiremit-metin: #8F3F29;
+      --yazi: #33231E; --soluk-yazi: #65493D;
+      --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+      --arayuz: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { min-width: 320px; }
+    body { margin: 0; background: var(--krem); color: var(--yazi); font-family: var(--serif); }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: .45; }
+    [hidden] { display: none !important; }
+    :focus-visible { outline: 3px solid #BF642F; outline-offset: 4px; }
+    .svg-deposu { position: absolute; width: 0; height: 0; overflow: hidden; }
+    .kilim-serit { width: 100%; height: 34px; display: block; color: var(--murdum); background: #E9D9BD; }
+    .arayuz { font-family: var(--arayuz); }
+    .dar-alan { width: min(1160px, calc(100% - 40px)); margin-inline: auto; }
+
+    /* ========== 2. ANA SAYFA: KAPAK VE SÜSLEMELER ========== */
+    .ana-sayfa { min-height: 100vh; overflow: clip; }
+    .kapak { isolation: isolate; position: relative; text-align: center; padding: 54px 20px 43px; overflow: hidden; }
+    .kapak::before, .kapak::after { content: "✳"; position: absolute; z-index: -1; color: var(--murdum); opacity: .055; line-height: 1; font-size: clamp(180px, 24vw, 420px); }
+    .kapak::before { left: -85px; top: -10px; transform: rotate(15deg); }
+    .kapak::after { right: -75px; bottom: -90px; transform: rotate(-12deg); }
+    .kapak-amblem { width: 126px; height: 151px; display: block; margin: 0 auto 10px; }
+    .kapak-kucuk { font-family: var(--arayuz); color: var(--kiremit-metin); font-size: 11px; font-weight: 750; letter-spacing: .26em; text-transform: uppercase; }
+    .kapak h1 { font-style: italic; font-size: clamp(3rem, 7.3vw, 6.1rem); font-weight: 600; color: var(--murdum); letter-spacing: -.05em; line-height: 1.08; margin: 17px 0 12px; }
+    .kapak-soz { color: var(--kahve); font-size: clamp(1.15rem, 2.1vw, 1.65rem); margin: 0; }
+    .yildiz-ayrac { display: flex; align-items: center; gap: 15px; width: min(330px, 80%); margin: 24px auto 20px; color: var(--kiremit-metin); }
+    .yildiz-ayrac::before, .yildiz-ayrac::after { content: ""; height: 1px; flex: 1; background: #C9AC8B; }
+    .yildiz-ayrac svg { width: 21px; height: 21px; }
+    .kapak-not { max-width: 630px; margin: auto; color: var(--soluk-yazi); font-size: 1.06rem; line-height: 1.8; }
+
+    /* ========== 3. ARAMA, KATEGORİLER VE KARTLAR ========== */
+    .arsiv { padding: 12px 0 90px; }
+    .arsiv-baslik { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; border-bottom: 1px solid #D8C4AA; padding-bottom: 13px; margin-bottom: 23px; }
+    .arsiv-baslik h2 { margin: 0; color: var(--murdum); font-size: clamp(1.5rem, 3vw, 2.1rem); font-style: italic; font-weight: 600; }
+    .arsiv-sayi { font-family: var(--arayuz); font-size: 12px; color: var(--soluk-yazi); letter-spacing: .11em; }
+    .arama-kapsayici { max-width: 690px; margin: 0 auto 21px; }
+    .arama-kapsayici label { display: block; margin-bottom: 8px; font-family: var(--arayuz); font-size: 13px; font-weight: 700; color: var(--kahve); }
+    .arama-kutusu { position: relative; }
+    .arama-kutusu svg { position: absolute; left: 17px; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; color: var(--kahve); pointer-events: none; }
+    #masal-arama { width: 100%; min-height: 52px; background: var(--kagit); border: 1.5px solid #BDA88E; border-radius: 8px; padding: 12px 15px 12px 50px; color: var(--yazi); font: 16px var(--arayuz); -webkit-appearance: none; appearance: none; }
+    #masal-arama::placeholder { color: #775E4F; opacity: 1; }
+    #masal-arama:focus { border-color: var(--murdum); }
+    .kategori-alani { display: flex; justify-content: center; flex-wrap: wrap; gap: 9px; padding: 5px 0 13px; }
+    .kategori-dugme { font-family: var(--arayuz); min-height: 44px; border: 1px solid #A98E79; background: transparent; border-radius: 24px; color: var(--kahve); padding: 9px 18px; font-size: 13px; font-weight: 650; }
+    .kategori-dugme[aria-pressed="true"] { background: var(--murdum); color: #FFF; border-color: var(--murdum); }
+    .kategori-dugme:not([aria-pressed="true"]):hover { background: #EEDFCB; }
+    .sonuc-bilgisi { font-family: var(--arayuz); color: var(--soluk-yazi); text-align: center; margin: 2px 0 27px; font-size: 13px; min-height: 20px; }
+    .kartlar { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 22px; align-items: stretch; }
+    .masal-karti { min-width: 0; display: flex; flex-direction: column; position: relative; padding: 10px 10px 18px; border: 1px solid #DFCDB5; border-radius: 7px; background: var(--kagit); box-shadow: 0 5px 0 #E8DAC7, 0 11px 22px #4B1D3F0D; transition: transform .2s ease, box-shadow .2s ease; cursor: pointer; }
+    .masal-karti:hover { transform: translateY(-4px); box-shadow: 0 9px 0 #E8DAC7, 0 17px 22px #4B1D3F16; }
+    .kart-gorsel-cerceve { aspect-ratio: 4 / 3; padding: 5px; background: var(--kart-vurgu); -webkit-clip-path: polygon(12% 0,88% 0,100% 12%,100% 88%,88% 100%,12% 100%,0 88%,0 12%); clip-path: polygon(12% 0,88% 0,100% 12%,100% 88%,88% 100%,12% 100%,0 88%,0 12%); }
+    .kart-gorsel-ic { overflow: hidden; width: 100%; height: 100%; background: #F6F0E9; -webkit-clip-path: inherit; clip-path: inherit; }
+    .masal-svg, .masal-fotograf { display: block; width: 100%; height: 100%; object-fit: cover; }
+    .kart-bilgi { flex: 1; padding: 13px 10px 0; display: flex; flex-direction: column; align-items: flex-start; }
+    .kart-ust { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 9px; margin-bottom: 10px; }
+    .kart-numara { position: relative; display: grid; place-items: center; width: 37px; height: 37px; flex: 0 0 auto; color: var(--kart-vurgu); font: 700 12px var(--arayuz); }
+    .kart-numara svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .kart-numara b { position: relative; z-index: 1; }
+    .kart-etiket { font: 700 10px var(--arayuz); text-transform: uppercase; letter-spacing: .11em; color: var(--kart-vurgu); text-align: right; }
+    .kart-ad { display: block; font-size: 1.37rem; color: var(--murdum); font-weight: 650; line-height: 1.25; min-height: 2.5em; margin-bottom: 10px; }
+    .kart-tanitim { display: block; color: var(--soluk-yazi); font-size: .96rem; line-height: 1.65; flex: 1; }
+    .kart-oku { display: inline-flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 22px; padding: 12px 16px; min-height: 44px; min-width: 144px; color: #FFF; background: var(--kart-vurgu); font: 700 13px var(--arayuz); letter-spacing: .02em; border: 0; border-radius: 4px; }
+    .kart-oku:hover { filter: brightness(.9); }
+    .bos-sonuc { margin-top: 10px; background: var(--kagit); padding: 30px 20px; text-align: center; border: 1px dashed #B69B8D; border-radius: 8px; color: var(--kahve); }
+    .bos-sonuc strong { display: block; font-size: 1.3rem; color: var(--murdum); margin-bottom: 7px; }
+
+    /* ========== 4. ANA SAYFA KAYNAKÇASI ========== */
+    .kaynakca { background: var(--murdum); color: #FFF4E6; }
+    .kaynak-icerik { padding: 47px 0 37px; }
+    .kaynakca h2 { margin: 0 0 15px; font-size: 2rem; font-style: italic; }
+    .kaynakca ol { padding-left: 23px; margin: 0 0 23px; columns: 2; column-gap: 55px; }
+    .kaynakca li { font-family: var(--arayuz); font-size: 12px; line-height: 1.8; margin-bottom: 10px; overflow-wrap: anywhere; break-inside: avoid; }
+    .kaynakca a { color: #FADFB8; text-underline-offset: 3px; }
+    .kaynak-not { border-top: 1px solid #FFFFFF44; padding-top: 17px; margin-top: 21px; font: 12px/1.8 var(--arayuz); color: #F3DCCF; }
+    .kaynak-ders { letter-spacing: .02em; }
+
+    /* ========== 5. MASAL OKUMA SAYFASI VE RENK PALETİ ========== */
+    .masal-gorunumu {
+      --zemin: #F8F1E3; --yuzey: #FFFCF5; --metin: #33231E;
+      --baslik: #4B1D3F; --soluk: #65493D; --vurgu: #B5573B;
+      --panel-vurgu: #4B1D3F; --dugme: #4B1D3F; --dugme-yazi: #FFFFFF;
+      --kenar: #DFCDB5;
+      min-height: 100vh; position: relative; isolation: isolate; background: var(--zemin); color: var(--soluk); overflow: hidden;
+    }
+    .masal-gorunumu::before { content: ""; position: absolute; inset: 0; background: var(--vurgu); opacity: .11; -webkit-mask-image: var(--desen-maske); mask-image: var(--desen-maske); -webkit-mask-size: 95px 95px; mask-size: 95px 95px; -webkit-mask-repeat: repeat; mask-repeat: repeat; pointer-events: none; z-index: -1; }
+    .masal-bant { height: 42px; background-color: var(--vurgu); opacity: .77; -webkit-mask-image: var(--desen-maske); mask-image: var(--desen-maske); -webkit-mask-size: 48px 48px; mask-size: 48px 48px; -webkit-mask-repeat: repeat; mask-repeat: repeat; }
+    /* Safari için renk değişen motifler, SVG veri adresli CSS maskeleridir. */
+    [data-desen="kalp"] { --desen-maske: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='black' d='M24 38C10 29 8 22 11 16c4-8 12-5 13-1 3-7 12-7 15 0 4 9-4 17-15 23Z'/%3E%3C/svg%3E"); }
+    [data-desen="yildiz"] { --desen-maske: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='black' d='M24 3 29 17 43 10 36 24 44 37 29 32 24 46 19 32 5 37 12 24 5 10 19 17Z'/%3E%3C/svg%3E"); }
+    [data-desen="dalga"] { --desen-maske: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath d='M-3 15Q9 2 21 15T48 15M-3 34Q9 21 21 34T48 34' fill='none' stroke='black' stroke-width='5'/%3E%3C/svg%3E"); }
+    [data-desen="cicek"] { --desen-maske: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cg fill='black'%3E%3Cellipse cx='24' cy='12' rx='7' ry='11'/%3E%3Cellipse cx='24' cy='36' rx='7' ry='11'/%3E%3Cellipse cx='12' cy='24' rx='11' ry='7'/%3E%3Cellipse cx='36' cy='24' rx='11' ry='7'/%3E%3Ccircle cx='24' cy='24' r='5'/%3E%3C/g%3E%3C/svg%3E"); }
+    [data-desen="halka"] { --desen-maske: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Ccircle cx='24' cy='24' r='17' fill='none' stroke='black' stroke-width='4'/%3E%3Ccircle cx='24' cy='24' r='7' fill='none' stroke='black' stroke-width='3'/%3E%3C/svg%3E"); }
+    [data-desen="nar"] { --desen-maske: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='black' d='M17 6 24 12 31 6 29 17C43 25 35 44 24 44S5 25 19 17Z'/%3E%3C/svg%3E"); }
+    [data-desen="yaprak"] { --desen-maske: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='black' d='M42 6C8 8 3 25 14 36 25 47 42 31 42 6ZM11 39 35 14'/%3E%3C/svg%3E"); }
+    [data-desen="kristal"] { --desen-maske: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='black' d='M24 2 43 24 24 46 5 24Z'/%3E%3Cpath fill='white' d='M24 10 35 24 24 38 13 24Z'/%3E%3C/svg%3E"); }
+    .okuma-sarmal { position: relative; z-index: 1; width: min(1100px, calc(100% - 40px)); margin: auto; padding: 28px 0 75px; }
+    .geri-dugme, .gecis-dugme, .mini-dugme, .boyut-dugme { border: 1px solid var(--kenar); color: var(--dugme-yazi); background: var(--dugme); font: 700 13px var(--arayuz); border-radius: 6px; min-height: 44px; padding: 10px 15px; }
+    .geri-dugme:hover, .gecis-dugme:hover, .mini-dugme:hover, .boyut-dugme:not(:disabled):hover { filter: brightness(.9); }
+    .geri-dugme { margin-bottom: 30px; }
+    .okuma-hero { display: grid; grid-template-columns: minmax(0, 46%) minmax(0, 1fr); align-items: center; gap: clamp(24px, 5vw, 68px); margin-bottom: 38px; }
+    .okuma-resim-kapsayici { width: min(100%, 440px); margin-inline: auto; filter: drop-shadow(0 14px 18px #10102524); }
+    .resim-dis { aspect-ratio: 1 / 1; background: var(--vurgu); padding: 7px; overflow: hidden; }
+    .resim-ic { width: 100%; height: 100%; overflow: hidden; background: var(--yuzey); }
+    .okuma-baslik-alani { min-width: 0; }
+    .okuma-ust-etiket { font: 750 12px var(--arayuz); letter-spacing: .15em; text-transform: uppercase; margin: 0 0 15px; color: var(--soluk); }
+    #masal-baslik { color: var(--baslik); font-size: clamp(2.3rem, 5.7vw, 4.9rem); line-height: 1.09; font-style: italic; font-weight: 600; letter-spacing: -.025em; margin: 0 0 20px; overflow-wrap: break-word; }
+    .okuma-baslik-cizgisi { width: 95px; height: 3px; background: var(--vurgu); margin-bottom: 17px; }
+    .okuma-giris { margin: 0; color: var(--soluk); font-size: clamp(1.04rem, 2.1vw, 1.27rem); line-height: 1.7; }
+    /* Her masal farklı başlık-resim düzeni alır. */
+    [data-yerlesim="sag"] .okuma-resim-kapsayici { grid-column: 2; grid-row: 1; }
+    [data-yerlesim="sag"] .okuma-baslik-alani { grid-column: 1; grid-row: 1; }
+    [data-yerlesim="ust"] .okuma-hero, [data-yerlesim="ortada"] .okuma-hero { display: flex; flex-direction: column; text-align: center; gap: 24px; }
+    [data-yerlesim="ust"] .okuma-resim-kapsayici { width: min(660px, 100%); }
+    [data-yerlesim="ortada"] .okuma-resim-kapsayici { width: min(300px, 72%); }
+    [data-yerlesim="ust"] .okuma-baslik-cizgisi, [data-yerlesim="ortada"] .okuma-baslik-cizgisi { margin-inline: auto; }
+    /* Sekiz çerçeve çeşidi: dış katman ve iç katman aynı biçimde kesilir. */
+    [data-cerceve="oval"] .resim-dis, [data-cerceve="oval"] .resim-ic { border-radius: 50% / 45%; }
+    [data-cerceve="kemer"] .resim-dis, [data-cerceve="kemer"] .resim-ic { border-radius: 48% 48% 8px 8px / 36% 36% 8px 8px; }
+    [data-cerceve="daire"] .resim-dis, [data-cerceve="daire"] .resim-ic { border-radius: 50%; }
+    [data-cerceve="genis"] .resim-dis { aspect-ratio: 3 / 2; border: 3px double var(--kenar); padding: 9px; }
+    [data-cerceve="genis"] .resim-ic { border: 2px solid var(--kenar); }
+    [data-cerceve="kitap"] .resim-dis { aspect-ratio: 4 / 3; padding: 16px; background: var(--kenar); border: 5px solid var(--vurgu); box-shadow: inset 0 0 0 3px var(--yuzey); }
+    [data-cerceve="kitap"] .resim-ic { border: 3px solid var(--vurgu); }
+    [data-cerceve="kose"] .resim-dis, [data-cerceve="kose"] .resim-ic { -webkit-clip-path: polygon(17% 0,83% 0,100% 17%,100% 83%,83% 100%,17% 100%,0 83%,0 17%); clip-path: polygon(17% 0,83% 0,100% 17%,100% 83%,83% 100%,17% 100%,0 83%,0 17%); }
+    [data-cerceve="sekizgen"] .resim-dis, [data-cerceve="sekizgen"] .resim-ic { -webkit-clip-path: polygon(29% 0,71% 0,100% 29%,100% 71%,71% 100%,29% 100%,0 71%,0 29%); clip-path: polygon(29% 0,71% 0,100% 29%,100% 71%,71% 100%,29% 100%,0 71%,0 29%); }
+    [data-cerceve="altigen"] .resim-dis, [data-cerceve="altigen"] .resim-ic { -webkit-clip-path: polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%); clip-path: polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%); }
+    .okuma-panel { width: min(890px, 100%); margin-inline: auto; padding: clamp(22px, 5vw, 54px); background: var(--yuzey); border: 1px solid var(--kenar); color: var(--metin); box-shadow: 0 13px 42px #14141413; border-radius: 8px; }
+    .panel-baslik { margin: 0 0 15px; color: var(--panel-vurgu); font-size: clamp(1.36rem, 3vw, 1.7rem); font-weight: 650; }
+    .ozet-etiket { margin: -6px 0 7px; color: var(--metin); opacity: .8; font: 12px/1.6 var(--arayuz); }
+    .okuma-ozet { min-height: 56px; border-bottom: 1px solid var(--kenar); margin: 0 0 37px; padding: 6px 2px 25px; font-size: 18px; line-height: 1.75; outline-offset: 3px; overflow-wrap: anywhere; }
+    .okuma-ozet:focus { outline: 2px solid var(--panel-vurgu); }
+    .metin-ust { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 24px; }
+    .metin-ust .panel-baslik { margin: 0; }
+    .metin-kontroller { display: flex; align-items: center; gap: 8px; font-family: var(--arayuz); }
+    .boyut-dugme { padding: 8px 13px; min-width: 46px; font-size: 17px; }
+    .boyut-sayi { min-width: 55px; text-align: center; color: var(--metin); font-size: 13px; font-variant-numeric: tabular-nums; }
+    .metin-turu { font: 600 12px/1.6 var(--arayuz); color: var(--panel-vurgu); letter-spacing: .04em; margin: -3px 0 23px; }
+    .masal-metni { font-size: 20px; line-height: 1.85; max-width: 66ch; margin: auto; overflow-wrap: anywhere; }
+    .masal-metni p { margin: 0 0 1.3em; }
+    .masal-metni p:first-child::first-letter { float: left; font-size: 3.2em; line-height: .82; padding: .08em .12em 0 0; color: var(--panel-vurgu); }
+    .bos-metin { border: 2px dashed var(--kenar); padding: 1.5em 1em; border-radius: 6px; text-align: center; font-style: italic; color: var(--metin); }
+    .masal-kaynak { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--kenar); font: 13px/1.8 var(--arayuz); overflow-wrap: anywhere; }
+    .masal-kaynak a { color: var(--panel-vurgu); font-weight: 750; text-underline-offset: 3px; }
+    .yazar-notu { margin: 8px 0 0; }
+    .masal-gecisleri { max-width: 890px; margin: 30px auto 0; }
+    .gecis-sira { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .gecis-dugme { display: flex; flex-direction: column; justify-content: center; text-align: left; align-items: flex-start; width: 100%; gap: 4px; white-space: normal; }
+    .gecis-dugme.sonraki { text-align: right; align-items: flex-end; }
+    .gecis-yon { font-size: 11px; font-weight: 500; opacity: .85; }
+    .gecis-ad { font-size: 14px; }
+    .mini-listesi { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin: 24px auto 0; }
+    .mini-dugme { padding: 9px 11px; background: var(--yuzey); color: var(--metin); font-size: 12px; border: 1px solid var(--kenar); }
+    .mini-dugme[aria-current="true"] { background: var(--dugme); color: var(--dugme-yazi); border-color: var(--dugme); }
+    .alt-geri { display: block; width: max-content; max-width: 100%; margin: 30px auto 0; }
+    @media (max-width: 750px) {
+      .okuma-hero, [data-yerlesim="sag"] .okuma-hero { display: flex; flex-direction: column; gap: 22px; text-align: center; }
+      .okuma-resim-kapsayici { width: min(400px, 90%); }
+      .okuma-baslik-cizgisi { margin-inline: auto; }
+      .kaynakca ol { columns: 1; }
+    }
+    @media (max-width: 480px) {
+      .dar-alan, .okuma-sarmal { width: calc(100% - 28px); }
+      .kapak { padding: 38px 13px 34px; }
+      .kapak-amblem { width: 103px; height: 126px; }
+      .kapak h1 { font-size: clamp(2.65rem, 10.6vw, 3.4rem); }
+      .kartlar { grid-template-columns: minmax(0, 1fr); }
+      .okuma-sarmal { padding-top: 18px; }
+      .okuma-panel { padding: 21px 17px; }
+      .okuma-ozet { font-size: 17px; }
+      .masal-metni { line-height: 1.85; }
+      .gecis-ad { font-size: 12px; }
+      .gecis-dugme { padding: 10px; }
+      .arsiv-baslik { align-items: center; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <!-- ========== 6. GÖRSEL DEPOSU: SAYFADA GÖRÜNMEYEN ÖZGÜN SVG ÇİZİMLER ========== -->
+  <!-- Safari için SVG deposu display:none değildir. Her resim 400×400 koordinat alanında çizilir. -->
+  <svg class="svg-deposu" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+    <defs>
+      <pattern id="kilim-desen" width="80" height="34" patternUnits="userSpaceOnUse">
+        <rect width="80" height="34" fill="#E9D9BD"/>
+        <path d="M0 0 20 15 40 0 60 15 80 0" fill="none" stroke="#4B1D3F" stroke-width="2"/>
+        <path d="M0 0 20 15 40 0 20 -15Z M40 0 60 15 80 0 60 -15Z" fill="#B5573B" opacity=".87"/>
+        <path d="M20 3 29 12 20 21 11 12Z M60 3 69 12 60 21 51 12Z" fill="#4B1D3F"/>
+        <path d="m0 34 10-13 10 13 10-13 10 13 10-13 10 13 10-13 10 13" fill="none" stroke="#B5573B" stroke-width="2"/>
+        <path d="M0 27H80" stroke="#4B1D3F" stroke-width="1" opacity=".55"/>
+      </pattern>
+      <!-- Ortak motifler: renklerini kullanıldıkları yerde currentColor'dan alır. -->
+      <g id="motif-yildiz"><path d="M0-20 6-9 20-14 14 0 20 14 6 9 0 20-6 9-20 14-14 0-20-14-6-9Z" fill="none" stroke="currentColor" stroke-width="2.6"/></g>
+      <g id="motif-yildiz-dolu"><path d="M0-20 6-9 20-14 14 0 20 14 6 9 0 20-6 9-20 14-14 0-20-14-6-9Z" fill="currentColor"/></g>
+      <g id="motif-lale"><path d="M0 17Q-18 1-13-15L-5-9 0-23 5-9 13-15Q18 1 0 17Z" fill="currentColor"/><path d="M0 15V30M0 23Q-12 16-17 23M0 25Q12 14 17 21" fill="none" stroke="currentColor" stroke-width="3"/></g>
+      <g id="motif-nar"><path d="M-8-17-3-25 3-21 9-26 11-15Q26-5 18 14 13 27 0 27-13 27-18 14-26-5-8-17Z" fill="currentColor"/></g>
+      <g id="motif-yaprak"><path d="M-18 17Q-26-14 23-22 23 19-18 17Z" fill="currentColor"/><path d="M-18 17Q0-5 23-22" fill="none" stroke="currentColor" stroke-width="2"/></g>
+      <g id="motif-kalp"><path d="M0 21C-34 1-21-25-6-17Q0-15 0-10 7-26 19-15 35 1 0 21Z" fill="currentColor"/></g>
+      <g id="motif-isilti"><path d="M0-20 4-5 19 0 4 5 0 20-4 5-19 0-4-5Z" fill="currentColor"/></g>
+      <!-- Her masalın gradyan adı kendi kısaltmasıyla başlar. -->
+      <linearGradient id="ya-gok" x2="0" y2="1"><stop stop-color="#D7A0A7"/><stop offset="1" stop-color="#F4D8C7"/></linearGradient>
+      <linearGradient id="ya-tepe" x2="0" y2="1"><stop stop-color="#C79D86"/><stop offset="1" stop-color="#966D68"/></linearGradient>
+      <linearGradient id="uc-gok" x1="0" x2="1" y2="1"><stop stop-color="#101A55"/><stop offset=".58" stop-color="#48317B"/><stop offset="1" stop-color="#67436E"/></linearGradient>
+      <radialGradient id="uc-aydinlik"><stop stop-color="#EAC36A" stop-opacity=".32"/><stop offset="1" stop-color="#EAC36A" stop-opacity="0"/></radialGradient>
+      <linearGradient id="uf-gok" x2="0" y2="1"><stop stop-color="#9DDDF8"/><stop offset="1" stop-color="#E6F7FF"/></linearGradient>
+      <linearGradient id="ys-gok" x2="1" y2="1"><stop stop-color="#D6BDE9"/><stop offset="1" stop-color="#FCE7EC"/></linearGradient>
+      <linearGradient id="ku-gece" x2="1" y2="1"><stop stop-color="#0B1032"/><stop offset="1" stop-color="#3F4B84"/></linearGradient>
+      <radialGradient id="ku-isik"><stop stop-color="#F6F5DB" stop-opacity=".85"/><stop offset="1" stop-color="#F6F5DB" stop-opacity="0"/></radialGradient>
+      <radialGradient id="nr-zemin"><stop stop-color="#9E3748"/><stop offset="1" stop-color="#430A20"/></radialGradient>
+      <linearGradient id="nr-meyve" x1="0" x2="1" y2="1"><stop stop-color="#E45D55"/><stop offset="1" stop-color="#821D37"/></linearGradient>
+      <linearGradient id="vd-gok" x2="0" y2="1"><stop stop-color="#F5E9B5"/><stop offset="1" stop-color="#FCF6D9"/></linearGradient>
+      <linearGradient id="tz-zemin" x2="0" y2="1"><stop stop-color="#F3E6CB"/><stop offset="1" stop-color="#D7F0F1"/></linearGradient>
+      <!-- 1. YÜREK ANA: kalp yaprakları, yüzsüz ana ve tepeler. -->
+      <g id="resim-yurek-ana">
+        <rect width="400" height="400" fill="url(#ya-gok)"/><circle cx="205" cy="129" r="103" fill="#FDE8DA" opacity=".45"/>
+        <path d="M0 253Q90 190 198 249T400 229V400H0Z" fill="#B58A7A"/><path d="M0 301Q117 249 230 299T400 282V400H0Z" fill="url(#ya-tepe)"/>
+        <path d="M35 351Q69 231 43 104M364 349Q337 210 362 94" fill="none" stroke="#41634C" stroke-width="6" stroke-linecap="round"/>
+        <g fill="#567D58"><path d="M48 259q-50-32-32-50 28-7 32 50Z"/><path d="M51 219q40-42 51-23 3 27-51 23Z"/><path d="M346 261q53-32 38-52-32-4-38 52Z"/><path d="M349 187q-41-33-51-17-5 26 51 17Z"/></g>
+        <g color="#AC4C68"><use href="#motif-kalp" transform="translate(37 148) scale(.86)"/><use href="#motif-kalp" transform="translate(79 272) scale(.65)"/><use href="#motif-kalp" transform="translate(360 150) scale(.92)"/><use href="#motif-kalp" transform="translate(320 284) scale(.7)"/></g>
+        <path d="M123 379Q130 282 150 235H248Q274 292 280 379Z" fill="#A95169"/><path d="M153 254Q179 283 200 266Q221 283 247 253L250 369H150Z" fill="#F2D9C0"/>
+        <path d="M175 223Q151 195 154 162Q158 124 200 123Q242 124 246 162Q247 195 224 222Z" fill="#782D47"/>
+        <ellipse cx="200" cy="174" rx="39" ry="51" fill="#EAC2A6"/>
+        <path d="M158 170Q146 116 200 106Q252 117 243 171Q226 144 200 142Q174 144 158 170Z" fill="#6F2944"/>
+        <path d="M167 217Q147 232 145 263L117 308 136 323 177 277M232 216Q254 225 258 269L287 304 268 323 221 277" fill="#A95169"/>
+        <g color="#D25D7B"><use href="#motif-kalp" transform="translate(200 280) scale(1.05)"/></g>
+        <path d="M145 347H255M144 356H256M142 365H260" stroke="#9D5A4E" stroke-width="3" stroke-dasharray="7 8"/>
+        <g color="#FFF5DD"><use href="#motif-yildiz-dolu" transform="translate(70 60) scale(.38)"/><use href="#motif-yildiz-dolu" transform="translate(329 64) scale(.38)"/></g>
+      </g>
+      <!-- 2. GÖKTEN DÜŞEN ÜÇ ELMA: üç elma görselin orta bölgesinde. -->
+      <g id="resim-gokten-dusen-uc-elma">
+        <rect width="400" height="400" fill="url(#uc-gok)"/><circle cx="210" cy="181" r="161" fill="url(#uc-aydinlik)"/>
+        <g fill="none" stroke="#E8C26C" opacity=".5"><circle cx="201" cy="191" r="145" stroke-width="1.4"/><path d="M32 267Q195 51 366 265" stroke-width="2"/></g>
+        <g color="#F6D991"><use href="#motif-yildiz" transform="translate(82 82) scale(.72)"/><use href="#motif-yildiz" transform="translate(303 260) scale(.52)"/><use href="#motif-isilti" transform="translate(110 274) scale(.37)"/><use href="#motif-isilti" transform="translate(317 112) scale(.41)"/><use href="#motif-isilti" transform="translate(187 42) scale(.27)"/></g>
+        <path d="M315 42a32 32 0 1 0 32 48 37 37 0 1 1-32-48Z" fill="#F8D785"/>
+        <g fill="#FAE3AF"><circle cx="35" cy="148" r="2.3"/><circle cx="168" cy="76" r="2"/><circle cx="375" cy="174" r="2.5"/><circle cx="260" cy="54" r="2"/><circle cx="41" cy="220" r="2"/><circle cx="363" cy="314" r="2"/></g>
+        <g fill="none" stroke="#EAC167" stroke-width="2.4" stroke-linecap="round" opacity=".75"><path d="M76 210q25-23 49-17"/><path d="M160 256q28-21 46-18"/><path d="M242 199q25-18 42-15"/></g>
+        <g transform="translate(128 193)"><path d="M0-30C-40-49-47-7-29 26-16 50 16 48 29 22 48-14 30-49 0-30Z" fill="#C43F4A"/><ellipse cx="-15" cy="-8" rx="6" ry="17" fill="#EB7E6E" opacity=".7"/><path d="M0-30q-4-20 8-29" stroke="#75432C" stroke-width="5" fill="none"/><path d="M5-48q18-17 32-7-7 16-32 7Z" fill="#6EAA64"/></g>
+        <g transform="translate(217 236) scale(.93)"><path d="M0-30C-40-49-47-7-29 26-16 50 16 48 29 22 48-14 30-49 0-30Z" fill="#D85250"/><ellipse cx="-15" cy="-8" rx="6" ry="17" fill="#F4A27C" opacity=".7"/><path d="M0-30q-4-20 8-29" stroke="#75432C" stroke-width="5" fill="none"/><path d="M5-48q18-17 32-7-7 16-32 7Z" fill="#75AD65"/></g>
+        <g transform="translate(286 168) scale(.8)"><path d="M0-30C-40-49-47-7-29 26-16 50 16 48 29 22 48-14 30-49 0-30Z" fill="#B93249"/><ellipse cx="-15" cy="-8" rx="6" ry="17" fill="#E98575" opacity=".7"/><path d="M0-30q-4-20 8-29" stroke="#75432C" stroke-width="5" fill="none"/><path d="M5-48q18-17 32-7-7 16-32 7Z" fill="#75AD65"/></g>
+        <path d="M0 356Q101 300 199 358T400 336V400H0Z" fill="#11183C"/><path d="M0 382Q126 338 262 381T400 362V400H0Z" fill="#28305E"/>
+      </g>
+      <!-- 3. KIRMIZI UÇURTMA: geniş gök, kırmızı elmas uçurtma ve kuyruk. -->
+      <g id="resim-kirmizi-ucurtma">
+        <rect width="400" height="400" fill="url(#uf-gok)"/><circle cx="335" cy="74" r="41" fill="#FFF4C9" opacity=".85"/>
+        <g fill="#FFFFFF" opacity=".9"><path d="M19 117q10-25 33-10 19-31 44-8 22-4 29 19Z"/><path d="M265 135q9-21 26-11 15-24 39-4 18-1 25 15Z"/><path d="M37 303q13-24 33-9 20-30 43-8 17-3 24 17Z"/></g>
+        <g fill="none" stroke="#5CB5D8" opacity=".68" stroke-width="3" stroke-linecap="round"><path d="M21 166q44-15 92 0"/><path d="M38 186q30-11 62-3"/><path d="M292 225q43-12 77 0"/><path d="M271 244q58-15 104 1"/></g>
+        <path d="M204 94 298 195 203 283 108 193Z" fill="#D32635"/><path d="M204 94 203 283 108 193Z" fill="#E74949"/><path d="M204 94 298 195 203 193Z" fill="#BF1B2C"/><path d="M203 193 298 195 203 283Z" fill="#F06459"/>
+        <path d="M204 96V280M110 193H297" stroke="#F8E4C0" stroke-width="5"/><circle cx="203" cy="193" r="7" fill="#F7E0BD"/>
+        <path d="M202 281Q252 306 214 337T226 404M203 193Q166 267 91 372" fill="none" stroke="#6E5948" stroke-width="2.5"/>
+        <g><path d="m228 313-16-15 1 23 15 10 20-17Z" fill="#FFFFFF" stroke="#D32635" stroke-width="2"/><path d="m211 347-15-11 2 19 16 10 14-17Z" fill="#D32635"/><path d="m224 374-14-12-1 20 17 8 13-15Z" fill="#FFFFFF" stroke="#D32635" stroke-width="2"/></g>
+        <g color="#FFFFFF"><use href="#motif-isilti" transform="translate(70 61) scale(.29)"/><use href="#motif-isilti" transform="translate(350 290) scale(.31)"/></g>
+      </g>
+      <!-- 4. AYŞECİK İLE YASEMİN SULTAN: saray kemeri ve yaseminler. -->
+      <g id="resim-aysecik-ile-yasemin-sultan">
+        <rect width="400" height="400" fill="url(#ys-gok)"/>
+        <path d="M66 382V166Q66 98 200 25 334 98 334 166V382Z" fill="#EDDEEF" stroke="#C49B55" stroke-width="8"/>
+        <path d="M91 382V171Q91 115 200 60 309 115 309 171V382Z" fill="#DCCDED" stroke="#F9E8C8" stroke-width="4"/>
+        <path d="M143 294V191q9-66 57-89 48 23 57 89v103Z" fill="#B39CC8"/>
+        <path d="M114 307V181h19v126M267 307V181h19v126" fill="#E4C792"/>
+        <path d="M112 181h23l-12-25Z M265 181h23l-12-25Z" fill="#C49B55"/>
+        <path d="M165 294V216a35 35 0 0 1 70 0v78" fill="#F6E8DA"/>
+        <path d="M163 218Q201 150 237 218" fill="none" stroke="#C49B55" stroke-width="4"/><path d="M145 295H257" stroke="#C49B55" stroke-width="5"/>
+        <path d="M68 308H334V400H68Z" fill="#F5E1C8"/><path d="M68 333H334M68 359H334M68 386H334M99 308v92m60-92v92m67-92v92m59-92v92" stroke="#D7B77E" stroke-width="2"/>
+        <path d="M44 396Q39 219 73 126M356 395Q360 216 326 124" fill="none" stroke="#617A59" stroke-width="6"/>
+        <g fill="#54826A"><ellipse cx="65" cy="242" rx="28" ry="11" transform="rotate(-31 65 242)"/><ellipse cx="38" cy="293" rx="28" ry="11" transform="rotate(37 38 293)"/><ellipse cx="344" cy="243" rx="28" ry="11" transform="rotate(30 344 243)"/><ellipse cx="368" cy="300" rx="28" ry="11" transform="rotate(-38 368 300)"/></g>
+        <g fill="#FFFDF6" stroke="#F4E6CC" stroke-width="1"><g transform="translate(59 187)"><ellipse cx="0" cy="-12" rx="8" ry="14"/><ellipse cx="0" cy="12" rx="8" ry="14"/><ellipse cx="-12" cy="0" rx="14" ry="8"/><ellipse cx="12" cy="0" rx="14" ry="8"/><circle r="5" fill="#D2B05E" stroke="none"/></g><g transform="translate(345 183)"><ellipse cy="-12" rx="8" ry="14"/><ellipse cy="12" rx="8" ry="14"/><ellipse cx="-12" rx="14" ry="8"/><ellipse cx="12" rx="14" ry="8"/><circle r="5" fill="#D2B05E" stroke="none"/></g><g transform="translate(34 342) scale(.8)"><ellipse cy="-12" rx="8" ry="14"/><ellipse cy="12" rx="8" ry="14"/><ellipse cx="-12" rx="14" ry="8"/><ellipse cx="12" rx="14" ry="8"/><circle r="5" fill="#D2B05E" stroke="none"/></g><g transform="translate(363 347) scale(.8)"><ellipse cy="-12" rx="8" ry="14"/><ellipse cy="12" rx="8" ry="14"/><ellipse cx="-12" rx="14" ry="8"/><ellipse cx="12" rx="14" ry="8"/><circle r="5" fill="#D2B05E" stroke="none"/></g></g>
+      </g>
+      <!-- 5. DİPSİZ KUYU: sessiz gece, ay ve geometrik taşlı kuyu. -->
+      <g id="resim-dipsiz-kuyu">
+        <rect width="400" height="400" fill="url(#ku-gece)"/><circle cx="199" cy="78" r="103" fill="url(#ku-isik)"/><circle cx="200" cy="75" r="32" fill="#E9EADF"/>
+        <g fill="#DAE4FF"><circle cx="58" cy="57" r="2"/><circle cx="327" cy="49" r="2.2"/><circle cx="359" cy="134" r="2"/><circle cx="92" cy="136" r="1.8"/><circle cx="282" cy="118" r="2"/></g>
+        <path d="M176 112 118 290H293L223 112Z" fill="#EFF1E5" opacity=".13"/>
+        <path d="M79 283Q200 239 322 283V363Q200 413 79 363Z" fill="#737D9D"/>
+        <path d="M79 290Q110 309 136 291L160 312 193 291 223 311 258 290 291 307 322 288M79 325Q112 346 143 323L172 342 207 326 240 347 279 325 322 342" stroke="#48536F" fill="none" stroke-width="8"/>
+        <g fill="#9EA9C0"><path d="M84 293 113 301 113 328 84 319Z"/><path d="M143 303 174 310 174 335 143 323Z"/><path d="M207 307 239 307 239 338 207 327Z"/><path d="M280 302 316 294 316 329 280 324Z"/></g>
+        <ellipse cx="200" cy="282" rx="126" ry="56" fill="#C9CED6"/><ellipse cx="200" cy="282" rx="111" ry="45" fill="#7A8AA9"/><ellipse cx="200" cy="282" rx="94" ry="34" fill="#29385F"/><ellipse cx="200" cy="282" rx="70" ry="21" fill="#141C42"/>
+        <ellipse cx="200" cy="282" rx="114" ry="49" fill="none" stroke="#E9E9E6" stroke-width="4" opacity=".85"/>
+        <g fill="none" stroke="#DDE6FA" stroke-width="2.5" stroke-dasharray="8 10" opacity=".65"><ellipse cx="200" cy="203" rx="90" ry="26"/><ellipse cx="200" cy="159" rx="61" ry="18"/></g>
+        <path d="M0 365Q72 343 122 365T248 363T400 365V400H0Z" fill="#1B254A"/>
+      </g>
+      <!-- 6. SİHİRLİ NAR: diğerlerinden farklı, simetrik madalyon düzeni. -->
+      <g id="resim-sihirli-nar">
+        <rect width="400" height="400" fill="url(#nr-zemin)"/>
+        <path d="M200 18 249 77 324 55 325 126 383 200 325 274 324 345 249 323 200 382 151 323 76 345 75 274 17 200 75 126 76 55 151 77Z" fill="none" stroke="#D7AF51" stroke-width="5"/>
+        <circle cx="200" cy="200" r="139" fill="#702036" stroke="#E8C574" stroke-width="5"/><circle cx="200" cy="200" r="122" fill="none" stroke="#E8C574" stroke-width="2" stroke-dasharray="5 10"/>
+        <g color="#4F8953"><use href="#motif-yaprak" transform="translate(201 75) rotate(105) scale(.76)"/><use href="#motif-yaprak" transform="translate(290 111) rotate(145) scale(.76)"/><use href="#motif-yaprak" transform="translate(325 201) rotate(195) scale(.76)"/><use href="#motif-yaprak" transform="translate(291 286) rotate(245) scale(.76)"/><use href="#motif-yaprak" transform="translate(202 327) rotate(290) scale(.76)"/><use href="#motif-yaprak" transform="translate(111 287) rotate(330) scale(.76)"/><use href="#motif-yaprak" transform="translate(75 199) rotate(10) scale(.76)"/><use href="#motif-yaprak" transform="translate(109 111) rotate(55) scale(.76)"/></g>
+        <g fill="#D7B055"><circle cx="200" cy="69" r="5"/><circle cx="292" cy="109" r="5"/><circle cx="332" cy="200" r="5"/><circle cx="292" cy="291" r="5"/><circle cx="200" cy="333" r="5"/><circle cx="108" cy="292" r="5"/><circle cx="68" cy="200" r="5"/><circle cx="108" cy="108" r="5"/></g>
+        <path d="M173 135q-48-17-57 39-11 90 84 119 104-34 83-123-10-46-56-35Z" fill="url(#nr-meyve)" stroke="#E9A45F" stroke-width="3"/>
+        <path d="M170 132 181 111 199 127 216 110 231 135" fill="#C99848" stroke="#F5D27D" stroke-width="3"/>
+        <path d="M221 147Q287 145 272 225Q264 255 224 275Q204 226 221 147Z" fill="#F2C68A"/>
+        <g fill="#B63345" stroke="#F9A275" stroke-width="1.7"><circle cx="237" cy="165" r="9"/><circle cx="252" cy="184" r="9"/><circle cx="230" cy="190" r="9"/><circle cx="254" cy="210" r="9"/><circle cx="232" cy="217" r="9"/><circle cx="241" cy="243" r="9"/></g>
+        <path d="M144 158q-25 41-6 81" fill="none" stroke="#F28B7B" stroke-width="9" stroke-linecap="round" opacity=".65"/>
+        <g color="#E6C26D"><use href="#motif-isilti" transform="translate(46 46) scale(.55)"/><use href="#motif-isilti" transform="translate(354 46) scale(.55)"/><use href="#motif-isilti" transform="translate(46 352) scale(.55)"/><use href="#motif-isilti" transform="translate(354 352) scale(.55)"/></g>
+        <path d="M4 0Q40 75 65 84M396 0Q360 75 335 84M4 400Q43 328 70 316M396 400Q357 328 330 316" fill="none" stroke="#47734D" stroke-width="7"/>
+      </g>
+      <!-- 7. VADİDEKİ NİNE: katmanlı yeşil vadi ve masal kitabı sadeliği. -->
+      <g id="resim-vadideki-nine">
+        <rect width="400" height="400" fill="url(#vd-gok)"/><circle cx="318" cy="80" r="43" fill="#EFC86F"/>
+        <path d="M0 223Q70 124 163 208T400 179V400H0Z" fill="#B7C99A"/><path d="M0 270Q139 187 243 257T400 220V400H0Z" fill="#8EA982"/>
+        <path d="M0 311Q96 258 179 304T400 274V400H0Z" fill="#6F906B"/><path d="M0 357Q146 299 250 356T400 317V400H0Z" fill="#507B5B"/>
+        <path d="M184 400Q115 357 168 328 237 303 188 275 161 261 171 250" fill="none" stroke="#E3C892" stroke-width="18" stroke-linecap="round"/>
+        <g transform="translate(85 227)"><rect x="-24" y="-2" width="50" height="42" fill="#EED6A3"/><path d="M-32-2 2-26 34-2Z" fill="#A76A55"/><rect x="-3" y="17" width="13" height="23" fill="#7C6D5D"/><rect x="-17" y="8" width="10" height="11" fill="#B5D1C4"/><path d="M18-22v-15" stroke="#8E7969" stroke-width="5"/><path d="M22-37q-12-8-5-15t-1-15" fill="none" stroke="#F7E6D5" stroke-width="5" opacity=".75"/></g>
+        <g fill="#416C4B"><path d="M31 273 14 306H49Z M32 245 9 285H55Z M33 224 14 261H51Z"/><rect x="28" y="286" width="8" height="30" fill="#785B41"/><path d="M349 228 321 293H376Z M349 258 315 315H385Z"/><rect x="344" y="296" width="10" height="40" fill="#785B41"/></g>
+        <g fill="#608C58"><circle cx="286" cy="267" r="27"/><circle cx="312" cy="256" r="29"/><circle cx="329" cy="279" r="25"/></g><rect x="306" y="281" width="10" height="37" fill="#806249"/>
+        <g fill="#F2D589"><circle cx="41" cy="350" r="5"/><circle cx="88" cy="366" r="5"/><circle cx="274" cy="372" r="5"/><circle cx="361" cy="352" r="5"/></g>
+        <g fill="#FCF4E4"><circle cx="45" cy="350" r="2"/><circle cx="92" cy="366" r="2"/><circle cx="278" cy="372" r="2"/><circle cx="365" cy="352" r="2"/></g>
+      </g>
+      <!-- 8. KIYMETLİ TUZ: üç boyut hissi veren tuz kristalleri ve dalgalar. -->
+      <g id="resim-kiymetli-tuz">
+        <rect width="400" height="400" fill="url(#tz-zemin)"/>
+        <g stroke="#D2C7A9" stroke-width="1" opacity=".45" fill="none"><path d="M0 45 400 245M0 95 400 295M0 145 400 345M0 195 400 395M400 45 0 245M400 95 0 295M400 145 0 345M400 195 0 395"/></g>
+        <path d="M177 40 123 208M223 40 276 208M200 24V203" stroke="#FFFFFF" stroke-width="12" opacity=".45"/>
+        <g transform="translate(90 144)"><path d="m0 34 47-27 47 27-47 27Z" fill="#FFFFFF" stroke="#87C4D0" stroke-width="2"/><path d="m0 34 47 27v62L0 95Z" fill="#ABDDE2"/><path d="m94 34-47 27v62l47-28Z" fill="#5CAAB8"/></g>
+        <g transform="translate(193 104)"><path d="m0 44 54-31 54 31-54 31Z" fill="#FFFFFF" stroke="#91C9D2" stroke-width="2"/><path d="m0 44 54 31v82L0 126Z" fill="#C4E9E9"/><path d="m108 44-54 31v82l54-31Z" fill="#7EC0CA"/></g>
+        <g transform="translate(151 230) scale(.76)"><path d="m0 34 47-27 47 27-47 27Z" fill="#FFFFFF" stroke="#87C4D0" stroke-width="2"/><path d="m0 34 47 27v62L0 95Z" fill="#ABDDE2"/><path d="m94 34-47 27v62l47-28Z" fill="#5CAAB8"/></g>
+        <path d="M0 318Q83 283 158 319T400 312V400H0Z" fill="#AFDFDF"/><path d="M0 347Q101 316 194 352T400 340V400H0Z" fill="#69C6CD"/><path d="M0 371Q117 339 220 377T400 365V400H0Z" fill="#278E9B"/>
+        <g fill="#FFFFFF"><circle cx="47" cy="347" r="3"/><circle cx="101" cy="376" r="4"/><circle cx="302" cy="355" r="3"/><circle cx="356" cy="382" r="3"/></g>
+        <g color="#FFFFFF"><use href="#motif-isilti" transform="translate(59 112) scale(.58)"/><use href="#motif-isilti" transform="translate(334 154) scale(.65)"/><use href="#motif-isilti" transform="translate(312 77) scale(.37)"/></g>
+      </g>
+    </defs>
+  </svg>
+
+  <!-- ========== 7. ANA SAYFA: MASAL KAPISI, ARAMA VE KARTLAR ========== -->
+  <main id="ana-sayfa" class="ana-sayfa">
+    <svg class="kilim-serit" viewBox="0 0 1200 34" preserveAspectRatio="none" aria-hidden="true"><rect width="1200" height="34" fill="url(#kilim-desen)"/></svg>
+    <header class="kapak">
+      <svg class="kapak-amblem" viewBox="0 0 140 165" aria-hidden="true">
+        <path d="M15 154V67Q15 29 70 8 125 29 125 67V154Z" fill="#4B1D3F"/>
+        <path d="M24 152V70Q24 36 70 18 116 36 116 70V152Z" fill="#D5B07A"/>
+        <path d="M33 151V72Q33 43 70 28 107 43 107 72V151Z" fill="#FFF5DD"/>
+        <path d="M44 148V77Q44 55 70 43 96 55 96 77V148Z" fill="#4B1D3F"/>
+        <g color="#D5B07A"><use href="#motif-yildiz-dolu" transform="translate(70 94) scale(1.07)"/></g>
+        <circle cx="70" cy="94" r="9" fill="#4B1D3F"/>
+        <g color="#B5573B"><use href="#motif-lale" transform="translate(16 107) scale(.7)"/><use href="#motif-lale" transform="translate(124 107) scale(.7)"/></g>
+        <path d="M6 156H134" stroke="#4B1D3F" stroke-width="4"/>
+      </svg>
+      <div class="kapak-kucuk">Sekiz masal · Sekiz ayrı dünya</div>
+      <h1>Bir Masal, Bin Hayal</h1>
+      <p class="kapak-soz">Her masal başka bir dünyaya açılan kapıdır.</p>
+      <div class="yildiz-ayrac" aria-hidden="true"><svg viewBox="-22 -22 44 44"><g color="#8F3F29"><use href="#motif-yildiz-dolu"/></g></svg></div>
+      <p class="kapak-not">Bir zamanlar anlatılan, bugün de içimizi ısıtan sekiz masal… Bu küçük arşivde her hikâyenin kendine özgü bir rengi, motifi ve hayal kapısı var.</p>
+    </header>
+
+    <section class="arsiv dar-alan" aria-labelledby="arsiv-baslik">
+      <div class="arsiv-baslik"><h2 id="arsiv-baslik">Masal Sandığı</h2><span class="arsiv-sayi">01 — 08</span></div>
+      <div class="arama-kapsayici">
+        <label for="masal-arama">Masalların arasında ara</label>
+        <div class="arama-kutusu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.4"/><path d="m15.5 15.5 5 5"/></svg>
+          <input id="masal-arama" type="search" placeholder="Masalın adını yaz… (örneğin: nar)" autocomplete="off">
+        </div>
+      </div>
+      <nav id="kategori-dugmeleri" class="kategori-alani" aria-label="Masal temaları"></nav>
+      <p id="sonuc-sayisi" class="sonuc-bilgisi" role="status" aria-live="polite"></p>
+      <div id="masal-kartlari" class="kartlar"></div>
+      <div id="bos-sonuc" class="bos-sonuc" hidden><strong>Aradığın masal bulunamadı</strong>Başka bir ad veya kategori deneyebilirsin.</div>
+    </section>
+
+    <!-- Kaynakça, ana sayfanın en altındadır; JavaScript sekiz kaynağı listeye ekler. -->
+    <footer class="kaynakca" aria-labelledby="kaynakca-baslik">
+      <svg class="kilim-serit" viewBox="0 0 1200 34" preserveAspectRatio="none" aria-hidden="true"><rect width="1200" height="34" fill="url(#kilim-desen)"/></svg>
+      <div class="kaynak-icerik dar-alan">
+        <h2 id="kaynakca-baslik">Kaynakça</h2>
+        <ol id="kaynakca-listesi"></ol>
+        <p class="kaynak-not">Bu projedeki illüstrasyonlar, bu proje için özgün SVG çizimleri olarak hazırlanmıştır. Masalların okuma metinleri, bağlantısı verilen hikâyelerin olay örgüsünden hareketle bu proje için özgün biçimde yeniden anlatılmıştır; kaynak metinlerin birebir kopyası değildir.</p>
+        <p class="kaynak-ders arayuz">Programlamaya Giriş dersi projesi · Medipol Üniversitesi · Görsel İletişim Tasarımı</p>
+      </div>
+    </footer>
+  </main>
+
+  <!-- ========== 8. MASAL GÖRÜNÜMÜ: AYNI BELGEDE AÇILAN OKUMA ALANI ========== -->
+  <section id="masal-gorunumu" class="masal-gorunumu" aria-label="Masal okuma görünümü" data-desen="kalp" data-yerlesim="sol" data-cerceve="oval" hidden>
+    <div class="masal-bant" aria-hidden="true"></div>
+    <div class="okuma-sarmal">
+      <button type="button" class="geri-dugme" data-eve>← Ana Sayfaya Dön</button>
+      <div class="okuma-hero">
+        <div class="okuma-resim-kapsayici"><div class="resim-dis"><div id="buyuk-gorsel" class="resim-ic"></div></div></div>
+        <div class="okuma-baslik-alani">
+          <p id="masal-ust-etiket" class="okuma-ust-etiket"></p>
+          <h1 id="masal-baslik" tabindex="-1"></h1>
+          <div class="okuma-baslik-cizgisi" aria-hidden="true"></div>
+          <p id="masal-giris" class="okuma-giris"></p>
+        </div>
+      </div>
+      <article class="okuma-panel">
+        <h2 class="panel-baslik">Masalın Özeti</h2>
+        <p class="ozet-etiket">Bu özeti buradan düzenleyebilirsin; kalıcı değişiklik için HTML dosyasındaki ozet alanını değiştir.</p>
+        <p id="masal-ozet" class="okuma-ozet" contenteditable="true" role="textbox" aria-label="Masalın kısa özetini düzenle" spellcheck="true"></p>
+        <div class="metin-ust">
+          <h2 class="panel-baslik">Masalın Tam Metni</h2>
+          <div class="metin-kontroller" aria-label="Masal metninin yazı boyutu">
+            <button id="boyut-kucult" class="boyut-dugme" type="button" aria-label="Yazıyı küçült">A−</button>
+            <output id="boyut-goster" class="boyut-sayi" aria-live="polite">20px</output>
+            <button id="boyut-buyut" class="boyut-dugme" type="button" aria-label="Yazıyı büyüt">A+</button>
+          </div>
+        </div>
+        <p id="metin-turu" class="metin-turu" aria-label="Metnin türü"></p>
+        <div id="masal-metni" class="masal-metni"></div>
+        <div class="masal-kaynak">
+          <strong>Kaynak:</strong> <a id="masal-kaynak-link" href="#" target="_blank" rel="noopener noreferrer">Masal Oku — kaynak sayfasını aç</a>
+          <p id="masal-yazar-notu" class="yazar-notu" hidden></p>
+        </div>
+      </article>
+      <nav id="masal-gecisleri" class="masal-gecisleri" aria-label="Masallar arasında gezinme">
+        <div class="gecis-sira">
+          <button id="onceki-masal" type="button" class="gecis-dugme"><span class="gecis-yon">← Önceki masal</span><span id="onceki-ad" class="gecis-ad"></span></button>
+          <button id="sonraki-masal" type="button" class="gecis-dugme sonraki"><span class="gecis-yon">Sonraki masal →</span><span id="sonraki-ad" class="gecis-ad"></span></button>
+        </div>
+        <div id="mini-masallar" class="mini-listesi" aria-label="Sekiz masalın kısa yolu"></div>
+      </nav>
+      <button type="button" class="geri-dugme alt-geri" data-eve>← Ana Sayfaya Dön</button>
+    </div>
+    <div class="masal-bant" aria-hidden="true"></div>
+  </section>
+  <noscript><p style="padding:24px;font-size:18px">Masalları açmak ve arşivde arama yapmak için tarayıcında JavaScript açık olmalıdır.</p></noscript>
+
+  <!-- ========== 9. JAVASCRIPT: ÖNCE VERİLER, SONRA İŞLEVLER ========== -->
+  <script>
+    'use strict';
+    // Bütün kategori adları tek yerde tutulur. Düğmeler bunlardan üretilir.
+    const kategoriler = { hepsi: 'Tümü', doga: 'Doğa', gokyuzu: 'Gökyüzü', gizem: 'Gizem', iyilik: 'İyilik ve Değer' };
+    const erisimTarihi = '28 Ekim 2026';
+
+    /* MASALLAR DİZİSİNİ NASIL DÜZENLERSİN?
+       id: Adres çubuğundaki kısa kimlik. | ad: Masalın başlığı.
+       kisaTanitim: Kartta ve okuma başlığında kısa açıklama. | ozet: Düzenlenebilir özet.
+       metin: Bu masalın özgün yeniden anlatımı; backtick içindeki metni istersen değiştirebilirsin. Paragraflar boş satırlarla ayrılır.
+       metinTuru: Okuma bölümünde görünen açıklama, örn. "Özgün yeniden anlatım".
+       kaynak: Masalın URL'si. | yazarNotu: Kaynakta geçen ad veya yöre notu.
+       kategoriler: Filtre grupları. | imageData: BU ALANI SEN DEĞİŞTİR; PNG/JPEG data URI.
+       resimKimligi: imageData boşsa gösterilecek özgün SVG'nin id'si.
+       resimAlt: Ekran okuyucuya görsel tarifi.
+       yerlesim: sol / sag / ust / ortada. | cerceve: Sekiz çerçeveden biri.
+       desen: Sayfanın silik motifinin adı.
+       renkler: zemin, yuzey, metin, baslik, soluk, vurgu, panelVurgu,
+                dugme, dugmeYazi, kenar ve kart: her masalın renk paleti.
+       Her alanın değeri ilgili masal nesnesinin içinde değiştirilebilir.
+    */
+    const masallar = [
+      { // 1 — YÜREK ANA
+        id: 'yurek-ana', ad: 'Yürek Ana',
+        kisaTanitim: 'On iki oğlunu türküsüyle zindandan kurtaran bir ananın masalı.',
+        ozet: 'Yiğit Ana\'nın on iki oğlu, kalenin zalim hükümdarı tarafından zindana atılır. Ananın kale duvarının dibinde söylediği türkü zindana ulaşır ve çocuklar kurtulur. Ana, oğullarına birer ay adı verir ve uzaklara dağılmalarını ister.',
+        metin: `Bir zamanlar, sevgisini söze sığdıramayan bir ana yaşarmış. Ona Yiğit Ana derlermiş. Bütün varlığı, on iki oğlunun iyiliğiymiş. Her birinin başka huyu, başka sesi, başka düşü varmış; ama analarının çağrısını duyduklarında hepsi aynı sevgiyle dönüp bakarmış. Yiğit Ana, onların iyi insanlar olarak büyümesini, birbirlerine ve yaşadıkları toprağa saygı duymasını istermiş.
+
+Ne var ki bu ailenin üzerine ağır bir gölge düşmüş. Ülkenin zalim hükümdarı on iki kardeşi bir kalenin zindanına kapattırmış. Taş duvarların ardında günler birbirine karışırken kardeşler dışarıdaki dünyayı, en çok da analarının sesini özlemiş. Yiğit Ana'nın yüreğineyse çocuklarının yokluğu koca bir boşluk gibi yerleşmiş. Yine de umudunu bırakmamış.
+
+Ana, kalenin önüne gitmiş. Demir kapılardan içeri girmesine izin verilmemiş, yüksek duvarlar önüne dikilmiş. O da elinden gelen tek şeye sarılmış: sesine. Kalenin dibinde durmuş, özlemini ve sevgisini bir türküye dökmüş. Türküsü taşlara çarpıp yankılanmış; duvarların öte yanında bekleyen oğullarına kadar ulaşmış. Ana sesinin bulunduğu yere umut da varmış. Çok geçmeden kardeşler zindandan kurtulmuş.
+
+Birbirlerini gördüklerinde sevinçleri sözlere sığmamış. Yiğit Ana bütün oğullarını sırayla kucaklamış. Fakat zalim hükümdarın ülkesinde kalmalarının yeniden tehlike getireceğini biliyormuş. Onlara uzak diyarlara gitmelerini, ayrı yollardan kendi hayatlarını kurmalarını söylemiş. Kardeşler analarından ayrılmayı istemeseler de onun sözlerinin sevgiden doğduğunu anlamış.
+
+Yola çıkmadan önce analarına bir soruları varmış: Farklı yerlere dağıldıklarında nasıl anılacaklarmış? Yiğit Ana biraz düşünmüş. Sonra onları yan yana dizmiş ve her birine bir ayın adını vermiş: Ocak, Şubat, Mart, Nisan, Mayıs, Haziran, Temmuz, Ağustos, Eylül, Ekim, Kasım ve Aralık. Böylece on iki kardeş, yılın on iki ayı gibi kendi sıralarına ve kendi yerlerine kavuşmuş.
+
+Kardeşler başka başka yönlere yürümüş. Yiğit Ana onların ardına bakarken üzgün olsa da sevginin uzaklıkla bitmediğini biliyormuş. Aylar nasıl birbirini izleyerek yılı tamamlıyorsa, kardeşlerin yolları da aynı ananın sevgisinde birleşiyormuş. O günden beri zaman dönüp dolaştıkça Yiğit Ana'nın türküsü de sevginin, özlemin ve umudun masalı olarak anlatılmış.`,
+        metinTuru: 'Özgün yeniden anlatım', // Kaynaktaki olaylar esas alınarak yeniden yazılmıştır; birebir kaynak metin değildir. // Yürek Ana'nın tam metni
+        kaynak: 'https://www.masaloku.net/yurek-ana/', yazarNotu: 'Kaynak sayfada masal yazarı olarak Taki Akkuş belirtilmiştir.',
+        kategoriler: ['iyilik', 'doga'], imageData: '', // BU ALANI SEN DEĞİŞTİR: Yürek Ana PNG/JPEG
+        resimKimligi: 'resim-yurek-ana',
+        resimAlt: 'Başında eşarp olan yüzsüz, stilize bir ana figürü göğsünde kalp tutuyor; iki yanında kalp biçimli yapraklı sarmaşıklar var.',
+        yerlesim: 'sol', cerceve: 'oval', desen: 'kalp',
+        renkler: { zemin:'#F6E1DC', yuzey:'#FFF9F5', metin:'#3F2524', baslik:'#7A2B3B', soluk:'#664641', vurgu:'#D4768A', panelVurgu:'#8E3548', dugme:'#8E3548', dugmeYazi:'#FFFFFF', kenar:'#E6B9B8', kart:'#A63D56' }
+      },
+      { // 2 — GÖKTEN DÜŞEN ÜÇ ELMA
+        id: 'gokten-dusen-uc-elma', ad: 'Gökten Düşen Üç Elma',
+        kisaTanitim: 'Çocuğu olmayan bir padişahın ve hanımının elma ağacıyla başlayan masalı.',
+        ozet: 'Çocuğu olmayan bir padişah bahçe yaptırır; umduğunu bulamayınca öfkelenir. Hanımı yaşlı bir elma ağacının sözünü dinler, yedi yıl sonra verdiği elmayı padişahla paylaşır ve bir oğulları olur. Kutlamalar sırasında gökten üç elma düşer.',
+        metin: `Uzak bir ülkenin padişahının her türlü zenginliği varmış. Sarayının odaları geniş, hazineleri dolu, sofrası bereketliymiş. Yine de en çok istediği şeye sahip değilmiş: bir çocuğa. Yıllar geçtikçe bu isteği büyüyor, sarayın kalabalığı bile ona sessiz görünüyormuş. Padişahın hanımı da onunla aynı özlemi taşıyormuş.
+
+Bir gün padişaha, güzel bir bahçe yaptırmasının iyi geleceği söylenmiş. Bunun üzerine sarayın yanında çiçeklerle, ağaçlarla ve su sesleriyle dolu büyük bir bahçe kurulmuş. Her yanda renkler ve kokular varmış; ancak beklenen haber gelmemiş. Padişah, bahçeye baktıkça sabırsızlığını hatırlar olmuş. Sonunda öfkesine yenilip güzelim bahçeyi dağıtmaya kalkışmış. Hanımı onu durdurmaya çalışmış; çünkü bahçeyi yalnızca bir dileğin karşılığı olarak değil, canlı bir yer olarak seviyormuş.
+
+Padişahın hanımı sık sık ağaçların arasında yürür, yaprakların hışırtısına kulak verirmiş. Bahçenin yaşlı elma ağacı onun sabrını görmüş. Masal bu ya, bir gün ağaç dile gelmiş ve kadına kendi filizlerinden birini dikmesini öğütlemiş. Filiz büyüyüp meyve verdiğinde elmayı padişahla paylaşmasını istemiş. Kadın bu sözlere inanmış; filizi alıp toprağa yerleştirmiş.
+
+Mevsimler geçmiş. Küçük filiz önce fidan, sonra güçlü bir ağaç olmuş. Kadın onu yıllarca koruyup gözetmiş. Yedinci yıl geldiğinde ağacın dalında tek bir elma belirivermiş. Elmanın bir yanı kızıl, öteki yanı açık renkliymiş. Kadın elmayı özenle koparıp ikiye bölmüş; yarısını kendisi yemiş, diğer yarısını padişaha vermiş.
+
+Aradan zaman geçince sarayda uzun zamandır beklenen müjde duyulmuş: padişahla hanımının bir oğlu dünyaya gelmiş. O güne dek üzüntüyle dolan avlular bu kez sevinçle canlanmış. İnsanlar birlikte gülmüş, kutlamalar başlamış. Bahçedeki ağaçlar bile sanki bu mutluluğa yapraklarıyla eşlik ediyormuş.
+
+Derken masalın sonuna yakışan o şaşırtıcı olay gerçekleşmiş: gökten üç elma düşmüş. Biri umutla bekleyenlere, biri sabrı unutmayanlara, biri de bu masalı dinleyenlere armağan olsun denmiş. Böylece yaşlı bir ağacın sözüne kulak veren kadının ve sonunda özlemlerine kavuşan ailenin hikâyesi, üç elmanın hatırasıyla yaşamaya devam etmiş.`,
+        metinTuru: 'Özgün yeniden anlatım', // Kaynaktaki olaylar esas alınarak yeniden yazılmıştır; birebir kaynak metin değildir. // Gökten Düşen Üç Elma'nın tam metni
+        kaynak: 'https://www.masaloku.net/gokten-dusen-uc-elma/', yazarNotu: '',
+        kategoriler: ['gokyuzu', 'gizem'], imageData: '', // BU ALANI SEN DEĞİŞTİR: Üç Elma PNG/JPEG
+        resimKimligi: 'resim-gokten-dusen-uc-elma',
+        resimAlt: 'Yıldızlı mor-lacivert gecede süzülen üç kırmızı elma; yanında bir hilal ve ince altın çizgiler.',
+        yerlesim: 'ust', cerceve: 'genis', desen: 'yildiz',
+        renkler: { zemin:'#11173F', yuzey:'#1B1F58', metin:'#F3EEDC', baslik:'#F4D58D', soluk:'#C9CCE6', vurgu:'#E3B94F', panelVurgu:'#F4D58D', dugme:'#E3B94F', dugmeYazi:'#1A1F4D', kenar:'#4A4F9A', kart:'#2E2C86' }
+      },
+      { // 3 — KIRMIZI UÇURTMA MASALI
+        id: 'kirmizi-ucurtma', ad: 'Kırmızı Uçurtma Masalı',
+        kisaTanitim: 'Alper\'in en iyi arkadaşı Sevim için yaptığı kırmızı uçurtmanın masalı.',
+        ozet: 'Hayalperest ve çalışkan Alper, en iyi arkadaşı Sevim\'in doğum günü için babasının yardımıyla kırmızı bir uçurtma yapar. Sevim hediyeyi çok sever; ikisi uçurtmayı çayırda birlikte uçurur ve uçurtma dostluklarının simgesi olur.',
+        metin: `Bir kasabada Alper adında, aklı sık sık gökyüzüne kayan bir çocuk yaşarmış. Uçurtmaları çok severmiş. Bir uçurtmanın yükselişini izlerken rüzgârın görünmeyen yollarını düşünür, renkli kâğıdın nasıl olup da göğe ulaşabildiğine şaşarmış. Onun en yakın arkadaşı ise neşeli ve yardımsever Sevim'miş. İkisi birlikte oyunlar oynar, gördüklerini birbirlerine anlatırmış.
+
+Sevim'in doğum günü yaklaşınca Alper ona sıradan bir hediye vermek istememiş. Sevim'i tanıdıkça, ona kendi elleriyle hazırladığı bir şeyin daha anlamlı olacağını düşünmüş. Gökyüzünde gördüğü uçurtmalar aklına gelmiş ve kararını vermiş: En iyi arkadaşı için kırmızı bir uçurtma yapacakmış.
+
+Alper işe hevesle başlamış ama bir uçurtmayı uçurmanın, onu uzaktan izlemek kadar kolay olmadığını anlamış. Çıtaların dengeli durması, kâğıdın düzgün gerilmesi ve ipin sağlam bağlanması gerekiyormuş. Babasından yardım istemiş. Babası da onunla birlikte çalışmış; böylece Alper, iyi bir sonuç için sabrın ve özenin gerekli olduğunu görmüş.
+
+Sonunda kırmızı kâğıdı ışıkta parlayan bir uçurtma ortaya çıkmış. Uzun kuyruğu hafifçe sallanıyor, ince ipi onu sahibine bağlıyormuş. Alper yaptıkları işe bakıp sevinmiş. Bu yalnızca bir oyuncak değilmiş artık; zamanını, emeğini ve Sevim'e duyduğu sevgiyi içinde taşıyan bir armağanmış.
+
+Doğum günü geldiğinde Alper hediyesini Sevim'e vermiş. Sevim paketi açınca şaşırmış, sonra yüzü kocaman bir gülümsemeyle aydınlanmış. Arkadaşının kendi elleriyle hazırladığı uçurtmaya bakarken ne kadar düşünüldüğünü anlamış. Alper de onun sevincini görünce emeklerinin karşılığını aldığını hissetmiş.
+
+Birlikte geniş bir çayıra çıkmışlar. Rüzgârın yönünü kollamış, ipi dikkatle tutmuşlar. Kırmızı uçurtma önce biraz sallanmış, ardından yükselmiş; kuyruğu gökyüzünün mavisi üzerinde dans eder gibi uzanmış. İki arkadaş uçurtmayı izlerken bir hediyenin değerini fiyatın değil, ardındaki düşüncenin belirlediğini hissetmiş.
+
+O günden sonra kırmızı uçurtma onların dostluğunu hatırlatan bir işaret olmuş. Ne zaman gökte süzüldüğünü görseler, birlikte verdikleri emeği ve paylaştıkları mutluluğu anımsarlarmış. Çünkü bazı armağanlar göğe yükselse de insanın kalbinde yer etmeyi sürdürürmüş.`,
+        metinTuru: 'Özgün yeniden anlatım', // Kaynaktaki olaylar esas alınarak yeniden yazılmıştır; birebir kaynak metin değildir. // Kırmızı Uçurtma Masalı'nın tam metni
+        kaynak: 'https://www.masaloku.net/kirmizi-ucurtma/', yazarNotu: '',
+        kategoriler: ['gokyuzu'], imageData: '', // BU ALANI SEN DEĞİŞTİR: Kırmızı Uçurtma PNG/JPEG
+        resimKimligi: 'resim-kirmizi-ucurtma',
+        resimAlt: 'Mavi gökyüzünde bulutların arasında uçan kırmızı bir uçurtma ve fiyonklu uzun kuyruğu.',
+        yerlesim: 'sag', cerceve: 'kose', desen: 'dalga',
+        renkler: { zemin:'#D6EDFA', yuzey:'#FFFFFF', metin:'#1B2F45', baslik:'#B3202A', soluk:'#3C566F', vurgu:'#E2323E', panelVurgu:'#B3202A', dugme:'#C4202C', dugmeYazi:'#FFFFFF', kenar:'#A9D5EE', kart:'#C4202C' }
+      },
+      { // 4 — AYŞECİK İLE YASEMİN SULTAN
+        id: 'aysecik-ile-yasemin-sultan', ad: 'Ayşecik ile Yasemin Sultan',
+        kisaTanitim: 'Bir sütçünün kızı ile bir sultanın saraydaki arkadaşlığının masalı.',
+        ozet: 'Sütçü babasıyla sarayı gezmeye giden Ayşecik, orada Yasemin Sultan\'la tanışıp arkadaş olur. Padişah bu arkadaşlığa karşı çıkar; Yasemin Sultan hastalanınca Ayşecik saraya çağrılır ve padişah onu ikinci kızı olarak kabul eder.',
+        metin: `Sarayın yakınındaki bir kasabada Ayşecik adında bir kız yaşarmış. Babası sütçüymüş; her gün saraya taze süt götürürmüş. Ayşecik uzaktan gördüğü o büyük yapıyı çok merak edermiş. Yüksek duvarların ardında nasıl bir yaşam olduğunu, geniş avluların ve süslü salonların nasıl göründüğünü düşünürmüş. Bir gün babasından kendisini de götürmesini istemiş.
+
+Babası onun isteğini kabul edince Ayşecik büyük bir sevinçle yola çıkmış. Saraya vardığında gördükleri hayal ettiğinden de farklıymış. İşini yapan görevliler, uzun koridorlar, gösterişli odalar ona bambaşka bir dünyanın kapısını aralamış. O sırada sarayda yaşayan Yasemin Sultan'la karşılaşmış. İlk başta çekinse de Yasemin Sultan'ın sıcak davranışı sayesinde rahatlamış.
+
+İki kız konuşmaya başladıklarında birbirlerinin dünyalarını tanımış. Birinin evi çiftliğin yanında, diğerinin evi sarayın içindeymiş; ama sevinçleri, merakları ve dost edinme istekleri birbirine benziyormuş. Ayşecik kendi evinden ve ailesinden söz etmiş. Yasemin Sultan da onu dikkatle dinlemiş. Birbirlerini yeniden görmek istemişler.
+
+Fakat bu arkadaşlık padişahın hoşuna gitmemiş. Ona göre bir sultan, sütçünün kızıyla yakınlık kurmamalıymış. Yasemin Sultan bu düşünceye karşı çıkmış; bir insanın değerinin doğduğu yere ya da giydiği kıyafete bağlı olmadığını anlatmaya çalışmış. Ne var ki padişah kararından dönmemiş ve iki arkadaşın görüşmesini yasaklamış.
+
+Ayrılık Yasemin Sultan'ı çok üzmüş. Gün geçtikçe neşesi sönmüş, sonunda hastalanmış. Saraydakiler onu iyileştirmek için çare aramış ama Yasemin Sultan en çok arkadaşını özlüyormuş. Kızının durumunu gören padişah, Ayşecik'i saraya çağırtmış.
+
+Ayşecik geldiğinde Yasemin Sultan'ın yüzü aydınlanmış. Uzun zamandır eksikliğini duyduğu dostluk yeniden yanında olmuş. Bu buluşma ona iyi gelmiş; zamanla sağlığına ve eski neşesine kavuşmuş. Padişah da iki kızın birbirine verdiği değeri gördükçe ön yargısını sorgulamış.
+
+Sonunda padişah, Ayşecik'i kendi kızı gibi kabul ettiğini söylemiş. Böylece sarayın kapıları yalnızca bir misafire değil, gerçek bir dostluğa açılmış. Ayşecik ile Yasemin Sultan'ın hikâyesi, insanların birbirini unvanlara göre değil, yüreklerine göre tanıması gerektiğini hatırlatan bir masal olarak anlatılmış.`,
+        metinTuru: 'Özgün yeniden anlatım', // Kaynaktaki olaylar esas alınarak yeniden yazılmıştır; birebir kaynak metin değildir. // Ayşecik ile Yasemin Sultan'ın tam metni
+        kaynak: 'https://www.masaloku.net/aysecik-ile-yasemin-sultan/',
+        yazarNotu: 'Kaynak sayfada metnin sonunda adı geçen kişi: Serdar Yıldırım (yazar mı derleyen mi belirtilmemiş)',
+        kategoriler: ['doga'], imageData: '', // BU ALANI SEN DEĞİŞTİR: Ayşecik PNG/JPEG
+        resimKimligi: 'resim-aysecik-ile-yasemin-sultan',
+        resimAlt: 'Altın kenarlı sivri bir saray kemeri; iki yanında beyaz yasemin çiçekleriyle dolanmış sarmaşıklar.',
+        yerlesim: 'ortada', cerceve: 'kemer', desen: 'cicek',
+        renkler: { zemin:'#E6DCF2', yuzey:'#FCF8FD', metin:'#382849', baslik:'#5B3A7E', soluk:'#5A4A6C', vurgu:'#C9A24B', panelVurgu:'#5B3A7E', dugme:'#6C4A93', dugmeYazi:'#FFFFFF', kenar:'#CDB9E4', kart:'#7A56A6' }
+      },
+      { // 5 — DİPSİZ KUYU
+        id: 'dipsiz-kuyu', ad: 'Dipsiz Kuyu',
+        kisaTanitim: 'Bir kuyunun dibinde başlayıp yer altı ülkesine uzanan bir macera.',
+        ozet: 'Padişahın iki oğlundan büyüğü, küçük kardeşini dipsiz bir kuyuya iter. Küçük kardeş yer altı ülkesinde bir nineye konuk olur, bir devle karşılaşır ve Zümrüdü Anka kuşunun yardımıyla yeryüzüne döner.',
+        metin: `Bir ülkede yaşlanan bir padişahın iki oğlu varmış. İki kardeş birbirleriyle geçinemez, özellikle taht konusu açılınca aralarındaki anlaşmazlık büyürmüş. Padişah hastalanınca oğullarından derdine çare bulmalarını istemiş. Bunun üzerine kardeşler yola çıkmış. Uzun yolculuklarının bir yerinde derinliği görünmeyen bir kuyunun yanında dinlenmişler.
+
+Kardeşler arasında yine anlaşmazlık çıkmış. Büyük kardeş, taht hırsına yenilerek küçüğünü kuyuya itmiş ve onu karanlığın içinde bırakmış. Küçük kardeşin çevresinde gördüğü tek şey, yukarıda giderek küçülen bir ışıkmış. Kendine geldiğinde bu kuyunun sıradan bir kuyu olmadığını fark etmiş. Orada karşılaştığı ihtiyar ona yardım edebilecek sihirli bir yol göstermiş.
+
+İhtiyarın verdiği imkânla iki at belirmiş: biri açık, diğeri koyu renkliymiş. Açık renkli olan yeryüzüne, öteki ise daha da derinlere gidiyormuş. Delikanlı bir karışıklık sonucu yanlış ata binmiş ve kendini yer altındaki başka bir ülkede bulmuş. Orada her şey yabancıymış; ama eve dönebilme düşüncesi onu ayakta tutuyormuş.
+
+Bir süre sonra bir ninenin kapısını çalmış. Nine onu konuk etmiş. Konuştukça yer altı ülkesinin büyük bir korkuyla yaşadığını öğrenmiş. Bir dev, insanların suyuna engel oluyormuş. Ülkenin sakinleri yaşamlarını sürdürebilmek için bu güç karşısında çaresiz kalmış. Delikanlı, yalnız kendi kurtuluşunu düşünmek yerine başkalarının sıkıntısına da kayıtsız kalmamış.
+
+Devle yüzleşmek kolay değilmiş. Yine de korkusunu yenip karşısına çıkmış ve halkın suyunu yeniden kullanabilmesini sağlamış. Yer altı ülkesinde duyulan sevinç, delikanlının yüreğine de cesaret vermiş. Ancak asıl istediği şey, bir gün güneş ışığını yeniden görebilmekmiş.
+
+Yolculuğunun devamında Zümrüdü Anka'yla karşılaşmış. Bu olağanüstü kuşun yardımına ihtiyacı varmış. Delikanlının gösterdiği iyilik ve cesaret, Anka'nın ona güvenmesini sağlamış. Kuş, onu yeniden yeryüzüne çıkarabilecek güce sahipmiş. Böylece kuyunun karanlığında başlayan yolculuk, gökyüzüne doğru açılan bir umuda dönüşmüş.
+
+Delikanlı sonunda yeryüzüne kavuşmuş. Artık kendisi için asıl değerin yalnızca bir tahta sahip olmak olmadığını biliyormuş. Karanlıkta tek başına kaldığında bile başkalarına yardım etmeyi seçmiş, cesareti ve iyiliği sayesinde yolunu bulmuş. Dipsiz Kuyu'nun masalı da, en derin karanlıkların içinden bile çıkış bulunabileceğini anlatır olmuş.`,
+        metinTuru: 'Özgün yeniden anlatım', // Kaynaktaki olaylar esas alınarak yeniden yazılmıştır; birebir kaynak metin değildir. // Dipsiz Kuyu'nun tam metni
+        kaynak: 'https://www.masaloku.net/dipsiz-kuyu-masali/',
+        yazarNotu: 'Kaynak sayfada masalın Afyon Karahisar yöresine ait olduğu belirtiliyor',
+        kategoriler: ['gizem'], imageData: '', // BU ALANI SEN DEĞİŞTİR: Dipsiz Kuyu PNG/JPEG
+        resimKimligi: 'resim-dipsiz-kuyu',
+        resimAlt: 'Gece gökyüzünde dolunay; ay ışığı, taş örgülü bir kuyunun halka halka derinleşen ağzına iniyor.',
+        yerlesim: 'ortada', cerceve: 'daire', desen: 'halka',
+        renkler: { zemin:'#12183D', yuzey:'#222B5E', metin:'#ECEFF8', baslik:'#D3DAF0', soluk:'#B8C2E0', vurgu:'#9AA8D6', panelVurgu:'#D3DAF0', dugme:'#CBD4EC', dugmeYazi:'#141B3D', kenar:'#4A5590', kart:'#3A4278' }
+      },
+      { // 6 — SİHİRLİ NAR
+        id: 'sihirli-nar', ad: 'Sihirli Nar',
+        kisaTanitim: 'Üç şehzadenin sihirli buluşlarının ve şifalı bir narın masalı.',
+        ozet: 'Padişah üç oğlunu farklı ülkelere gönderir. Mehmet sihirli bir halı, Selim sihirli bir ayna edinir; Murat\'ın şifalı narı ise hasta Gülnaz Sultan\'ı iyileştirir. Gülnaz Sultan, Murat\'ın gönül zenginliğini görüp onunla evlenmeyi seçer.',
+        metin: `Bir padişahın Mehmet, Selim ve Murat adında üç oğlu varmış. Padişah, oğullarının dünyayı tanımasını ve birbirinden farklı yerlerde öğrendiklerini görmeyi istemiş. Bu yüzden üçünü ayrı ülkelere göndermiş. Üç şehzade yola çıkarken ne bulacaklarını, hangi insanlarla karşılaşacaklarını bilmiyormuş; her biri kendi yolunu izlemiş.
+
+Mehmet'in yolculuğu ona olağanüstü bir halı kazandırmış. Bu halı sıradan bir dokuma değil, sihirli bir eşya imiş. Selim'in elineyse başka bir büyülü nesne geçmiş: uzaklarda olup bitenleri gösterebilen bir ayna. İki kardeş de sahip oldukları şeylerin değerini anlamaya çalışmış. Murat ise şifalı bir nar bulmuş; narın görünüşü sade olsa da etkisi çok büyükmüş.
+
+Üç kardeş yeniden bir araya geldiklerinde edindikleri nesneleri birbirlerine göstermiş. Halı, ayna ve nar birbirine hiç benzemiyormuş. Bu farklılık, hangisinin daha değerli olduğu sorusunu da ortaya çıkarmış. Bir eşyayı yalnızca parlaklığına, gücüne ya da seyrek bulunmasına bakarak değerlendirmek yeterli miymiş?
+
+O sırada Gülnaz Sultan'ın hastalığı önemli bir sorun hâline gelmiş. Ona yardım edilmesi gerekiyormuş. Kardeşlerin bulduğu büyülü nesneler bu kez yalnızca hayranlık uyandıran şeyler olmaktan çıkıp bir amaca hizmet etmiş. Murat'ın yanında taşıdığı narın şifalı olduğu anlaşılmış. Nar sayesinde Gülnaz Sultan iyileşmiş.
+
+İyileşmenin ardından Gülnaz Sultan, üç şehzadeyi de düşünmüş. Elbette hepsinin yolculuğu farklı bir emek ve cesaret gerektirmiş. Fakat o, Murat'ın davranışında başka bir değer görmüş. Murat elindeki nimeti yalnız kendisi için saklamamış, bir insanın iyileşmesine yardımcı olmuş. Gülnaz Sultan'ın dikkatini çeken, nar kadar Murat'ın gönül zenginliğiymiş.
+
+Sonunda Gülnaz Sultan evlenmek için Murat'ı seçmiş. Böylece üç kardeşin büyülü eşyaları arasında yapılan karşılaştırma, bambaşka bir anlama kavuşmuş: En değerli şey her zaman en gösterişli olan değil, ihtiyaç duyulduğu anda iyiliğe dönüşebileniymiş. Sihirli narın masalı da bu düşünceyle dilden dile anlatılmış.`,
+        metinTuru: 'Özgün yeniden anlatım', // Kaynaktaki olaylar esas alınarak yeniden yazılmıştır; birebir kaynak metin değildir. // Sihirli Nar'ın tam metni
+        kaynak: 'https://www.masaloku.net/sihirli-nar/', yazarNotu: '',
+        kategoriler: ['doga', 'gizem'], imageData: '', // BU ALANI SEN DEĞİŞTİR: Sihirli Nar PNG/JPEG
+        resimKimligi: 'resim-sihirli-nar',
+        resimAlt: 'Bordo zeminde sekiz köşeli yıldız ve yapraklarla çevrili büyük bir nar; narın bir dilimi açık, kırmızı taneleri görünüyor.',
+        yerlesim: 'sag', cerceve: 'sekizgen', desen: 'nar',
+        renkler: { zemin:'#561327', yuzey:'#FBF0DB', metin:'#3A1A20', baslik:'#F6D58A', soluk:'#F0D7BE', vurgu:'#D6A93E', panelVurgu:'#8A1F3B', dugme:'#2F6B3A', dugmeYazi:'#FFFFFF', kenar:'#E6C98A', kart:'#8A1F3B' }
+      },
+      { // 7 — VADİDEKİ NİNE
+        id: 'vadideki-nine', ad: 'Vadideki Nine',
+        kisaTanitim: 'Bir delikanlının annesini vadiye bırakmasıyla başlayan masal.',
+        ozet: 'Gelinin isteği üzerine annesini bir vadiye bırakmak zorunda kalan delikanlı, ertesi gün onu ceylanların çevresinde bulur. Gelin de aynı yolu kendi annesiyle denemek ister.',
+        metin: `Dağlara yakın küçük bir köyde bir delikanlı annesiyle yaşarmış. Yıllar boyunca aynı evin sevinçlerini ve güçlüklerini paylaşmışlar. Delikanlı büyüdükçe annesi yaşlanmış; eskiden kolaylıkla yaptığı işler artık ona ağır gelmeye başlamış. Oğlu annesinin yorulmamasını istermiş. Evlerinde eksik olanı birlikte tamamlamaya çalışırlarmış.
+
+Bir süre sonra delikanlı evlenmiş. İlk günlerde herkesin huzurlu olmasını ummuş. Fakat zaman geçtikçe gelin, yaşlı ninenin evde bulunmasını istememeye başlamış. Ninenin çalışamamasını ve yardıma ihtiyaç duymasını bir yük gibi görüyormuş. Delikanlı ise annesinin kendisine yıllarca emek verdiğini biliyor, onun bu evden gönderilmesine razı olmak istemiyormuş.
+
+Gelin ısrar ettikçe evdeki huzur azalmış. Delikanlı sonunda istemediği bir karar vermiş: Annesini uzak bir vadiye götürüp orada bırakacakmış. Yaşlı nine oğlunun içindeki kederi anlamış. Birlikte yola çıkmışlar. Yol uzadıkça delikanlının adımları ağırlaşmış. Vadide vedalaştıklarında annesi ona kızgınlık göstermek yerine iyilik dilemiş. Bu da oğlunun üzüntüsünü daha da derinleştirmiş.
+
+Delikanlı eve dönmüş ama ne yapsa rahatlayamamış. Annesini nasıl bir yerde bıraktığını, yalnız başına ne yaptığını düşünmekten uyuyamaz olmuş. Sonunda yeniden vadiye gitmiş. Oraya yaklaştığında korktuğu manzarayla değil, beklemediği bir görüntüyle karşılaşmış: Ninenin çevresinde ceylanlar dolaşıyormuş. Vadi, ona bıraktığı zamankinden çok daha sakin ve huzurlu görünmüş.
+
+Delikanlı annesini sağ salim görünce sevinçle yanına varmış. Ninenin çevresinde toplanan ceylanlar, onun yalnız bırakılmış olsa bile doğayla bir yakınlık kurabildiğini gösteriyormuş. Oğlu bu manzarayı görünce annesinin kıymetini yeniden hatırlamış. Yaşlılık, bir insanın sevgisini ya da değerini eksiltmiyormuş.
+
+Bu olayın ardından gelin de kendi annesini aynı vadiye bırakmayı istemiş. Onun isteği, delikanlının yaşadıklarının ne anlama geldiğini gerçekten anlayıp anlamadığını sorgulatan bir dönüm noktası olmuş. Çünkü görünen aynı vadi olsa bile insanlar oraya aynı niyetle gitmiyormuş. Birini bırakmanın ardında sevgi, utanç, çıkar ya da bencillik bulunabilirmiş.
+
+Vadideki Nine'nin anlatısı, yaşlı bir insanın yalnızca gücü azaldığı için değersiz sayılamayacağını düşündürürmüş. Delikanlının pişmanlığı, ninenin sakinliği ve ceylanların etrafındaki huzuru, masalı dinleyenlerin aklında uzun süre kalırmış. Ananın yeri, ona gösterilen saygıyla ölçülürmüş.`,
+        metinTuru: 'Özgün yeniden anlatım', // Kaynaktaki olaylar esas alınarak yeniden yazılmıştır; birebir kaynak metin değildir. // Vadideki Nine'nin tam metni
+        kaynak: 'https://www.masaloku.net/vadideki-nine/',
+        yazarNotu: 'Kaynak sayfada metnin sonunda adı geçen kişi: Nazife Çiftçioğlu',
+        kategoriler: ['doga'], imageData: '', // BU ALANI SEN DEĞİŞTİR: Vadideki Nine PNG/JPEG
+        resimKimligi: 'resim-vadideki-nine',
+        resimAlt: 'Katmanlı yeşil tepeler, küçük bir ev, ağaçlar ve tepelerin arasından kıvrılan bir patika.',
+        yerlesim: 'ust', cerceve: 'kitap', desen: 'yaprak',
+        renkler: { zemin:'#E2E8D0', yuzey:'#FCF8EC', metin:'#382F22', baslik:'#46623E', soluk:'#564E3C', vurgu:'#E2BC57', panelVurgu:'#4F6B47', dugme:'#566F4B', dugmeYazi:'#FFFFFF', kenar:'#C5D0AC', kart:'#5E7B52' }
+      },
+      { // 8 — KIYMETLİ TUZ
+        id: 'kiymetli-tuz', ad: 'Kıymetli Tuz',
+        kisaTanitim: 'Bir padişahın küçük kızının ve tuzun değerinin masalı.',
+        ozet: 'Padişahın küçük kızı, babasının öfkesine uğrar ve saraydan uzaklaşır. Yıllar sonra babasını tuzsuz hazırlanmış bir ziyafete çağırır ve ona tuzun değerini gösterir; baba da kızıyla barışır.',
+        metin: `Bir zamanlar üç kızı olan bir padişah yaşarmış. Sarayında saygı görmekten hoşlanır, kızlarının da kendisini ne kadar sevdiğini duymak istermiş. Bir gün onları yanına çağırmış ve her birine sevgisini nasıl anlatacağını sormuş. Büyük kız çok büyük sözler söylemiş, ortanca kız da sevgisini ölçmek için geniş benzetmeler bulmuş. En küçük kız ise babasını tuz kadar sevdiğini söylemiş.
+
+Padişah bu cevabı duyunca öfkelenmiş. Tuz ona sıradan ve değersiz görünüyormuş. Küçük kızının sözünü bir sevgi ifadesi olarak değil, küçümseme olarak anlamış. Kızı ne demek istediğini anlatmaya fırsat bulamadan saraydan uzaklaştırılmış. Böylece birkaç kelimenin yanlış anlaşılması, bir ailenin arasına uzun yıllar sürecek bir ayrılık koymuş.
+
+Küçük kız, bildiği düzenin dışında yaşamayı öğrenmek zorunda kalmış. Zaman geçtikçe büyümüş, kendi hayatını kurmuş. Eski sarayına dönmese de babasına söylediği sözlerin anlamını unutmamış. Onu inciten şey, babasının öfkesi kadar sevgisinin anlaşılamamış olmasıymış. Yine de bir gün her şeyi açıklayabileceğini düşünmüş.
+
+Yıllar sonra babasını bir ziyafete davet etme fırsatı doğmuş. Sofra özenle hazırlanmış, yemekler sıralanmış; ancak küçük kız aşçılardan önemli bir şey istemiş: O gün bütün yemekler tuzsuz pişirilecekmiş. Ziyafetin konukları masaya oturduğunda her şeyin güzel göründüğünü fark etmiş. Fakat padişah lokmaları tattıkça bir eksiklik hissetmeye başlamış.
+
+Önündeki çeşit çeşit yemek göze güzel görünse de tadı yerinde değilmiş. Padişah bunun nedenini sorunca sofranın tuzsuz hazırlandığı anlaşılmış. İşte o zaman küçük kız ona yıllar önce söylediklerini hatırlatmış. Tuz tek başına övünülecek bir şey gibi görünmeyebilirmiş; ama yokluğunda en güzel yemek bile tadını kaybedermiş. Kızının sevgisi de onun hayatındaki böyle temel bir değermiş.
+
+Padişah sonunda sözlerin ardındaki anlamı kavramış. Küçük kızının kendisini küçümsemediğini, tersine hayatın vazgeçilmez bir parçasına benzettiğini anlamış. Hatasından utanmış ve kızıyla barışmış. Uzun ayrılıktan sonra yeniden bir araya gelmeleri ikisine de sevinç vermiş.
+
+O günden sonra padişah, bir sözün değerini yalnız kulağa ne kadar görkemli geldiğiyle ölçmemek gerektiğini bilirmiş. Kıymetli Tuz'un masalı da sevginin bazen gösterişli sözlerde değil, gündelik yaşamın en sade ama en gerekli şeylerinde gizlendiğini anlatırmış.`,
+        metinTuru: 'Özgün yeniden anlatım', // Kaynaktaki olaylar esas alınarak yeniden yazılmıştır; birebir kaynak metin değildir. // Kıymetli Tuz'un tam metni
+        kaynak: 'https://www.masaloku.net/kiymetli-tuz/', yazarNotu: '',
+        kategoriler: ['iyilik'], imageData: '', // BU ALANI SEN DEĞİŞTİR: Kıymetli Tuz PNG/JPEG
+        resimKimligi: 'resim-kiymetli-tuz',
+        resimAlt: 'Kum rengi zeminde beyaz ve açık turkuaz tuz kristali küpler; önlerinde turkuaz dalgalar.',
+        yerlesim: 'sol', cerceve: 'altigen', desen: 'kristal',
+        renkler: { zemin:'#E4F5F6', yuzey:'#FFFFFF', metin:'#16333C', baslik:'#0B6574', soluk:'#3A5962', vurgu:'#4DBAC8', panelVurgu:'#0B6574', dugme:'#0E6E7E', dugmeYazi:'#FFFFFF', kenar:'#B5E0E6', kart:'#0E7C8C' }
+      }
+    ];
+
+    // Sayfanın hatırladığı küçük durumlar (tarayıcı hafızasında kalıcı kayıt değildir).
+    let seciliKategori = 'hepsi';
+    let sonKartId = '';
+    let anaKaydirma = 0;
+    let aktifMasalId = '';
+    let yaziBoyutu = 20;
+
+    // HTML içine değişken metin yerleştirilirken özel karakterleri güvenli hale getirir.
+    function kacir(deger) {
+      return String(deger).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    // Türkçe aramalar için harfleri küçültür, aksanları ve özel harfleri sadeleştirir.
+    function metniSadelestir(metin) {
+      const harfler = { 'ç':'c', 'ğ':'g', 'ı':'i', 'ö':'o', 'ş':'s', 'ü':'u', 'â':'a', 'î':'i', 'û':'u' };
+      return String(metin).toLocaleLowerCase('tr-TR').replace(/[çğıöşüâîû]/g, function(harf) { return harfler[harf]; });
+    }
+
+    // Verilen id'ye ait masalı dizide bulur; bulunmazsa null döndürür.
+    function masalBul(id) {
+      for (let i = 0; i < masallar.length; i++) {
+        if (masallar[i].id === id) return masallar[i];
+      }
+      return null;
+    }
+
+    // imageData doldurulursa gerçek resim, boşsa SVG yedek çizimi oluşturur.
+    function gorselHtml(masal) {
+      if (masal.imageData.indexOf('data:image/') === 0) {
+        return '<img class="masal-fotograf" src="' + kacir(masal.imageData) + '" alt="' + kacir(masal.resimAlt) + '">';
+      }
+      return '<svg class="masal-svg" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice" role="img" aria-label="' + kacir(masal.resimAlt) + '"><use href="#' + kacir(masal.resimKimligi) + '"></use></svg>';
+    }
+
+    // Masal kartlarını arama ve kategoriyle eşleşen verilere göre yeniden çizer.
+    function kartlariCiz() {
+      const sorgu = metniSadelestir(document.getElementById('masal-arama').value.trim());
+      const bulunanlar = masallar.filter(function(masal) {
+        const adEslesiyor = metniSadelestir(masal.ad).indexOf(sorgu) !== -1;
+        const kategoriEslesiyor = seciliKategori === 'hepsi' || masal.kategoriler.indexOf(seciliKategori) !== -1;
+        return adEslesiyor && kategoriEslesiyor;
+      });
+      const kartAlani = document.getElementById('masal-kartlari');
+      kartAlani.innerHTML = '';
+      bulunanlar.forEach(function(masal) {
+        const sira = masallar.indexOf(masal) + 1;
+        const kart = document.createElement('article');
+        kart.className = 'masal-karti';
+        kart.id = 'kart-' + masal.id;
+        kart.tabIndex = 0;
+        kart.setAttribute('role', 'link');
+        kart.setAttribute('aria-label', masal.ad + ' masalını oku');
+        kart.setAttribute('data-masal', masal.id);
+        kart.style.setProperty('--kart-vurgu', masal.renkler.kart);
+        kart.innerHTML = '<div class="kart-gorsel-cerceve"><div class="kart-gorsel-ic">' + gorselHtml(masal) + '</div></div>' +
+          '<div class="kart-bilgi"><div class="kart-ust"><span class="kart-numara"><svg viewBox="-22 -22 44 44" aria-hidden="true"><g color="currentColor"><use href="#motif-yildiz"></use></g></svg><b>' + String(sira).padStart(2, '0') + '</b></span>' +
+          '<span class="kart-etiket">' + kacir(kategoriler[masal.kategoriler[0]]) + '</span></div>' +
+          '<strong class="kart-ad">' + kacir(masal.ad) + '</strong><span class="kart-tanitim">' + kacir(masal.kisaTanitim) + '</span>' +
+          '<button class="kart-oku" type="button" data-masal="' + kacir(masal.id) + '">Masalı Oku <span aria-hidden="true">↗</span></button></div>';
+        kartAlani.appendChild(kart);
+      });
+      document.getElementById('bos-sonuc').hidden = bulunanlar.length !== 0;
+      document.getElementById('sonuc-sayisi').textContent = bulunanlar.length + ' masal bulundu';
+    }
+
+    // Süzme işlemini günceller; arama ve kategori aynı anda etkili olur.
+    function listeyiGuncelle() { kartlariCiz(); }
+
+    // Kategori düğmelerini tek kategori nesnesinden üretir ve seçili durumu işaretler.
+    function kategorileriCiz() {
+      const alan = document.getElementById('kategori-dugmeleri');
+      alan.innerHTML = '';
+      for (const kimlik in kategoriler) {
+        const dugme = document.createElement('button');
+        dugme.type = 'button';
+        dugme.className = 'kategori-dugme';
+        dugme.textContent = kategoriler[kimlik];
+        dugme.setAttribute('data-kategori', kimlik);
+        dugme.setAttribute('aria-pressed', kimlik === seciliKategori ? 'true' : 'false');
+        alan.appendChild(dugme);
+      }
+    }
+
+    // Açılan masalın renklerini ve tasarım türlerini okuma ekranına uygular.
+    function temayiUygula(masal) {
+      const alan = document.getElementById('masal-gorunumu');
+      const cssAdlari = { zemin:'--zemin', yuzey:'--yuzey', metin:'--metin', baslik:'--baslik', soluk:'--soluk', vurgu:'--vurgu', panelVurgu:'--panel-vurgu', dugme:'--dugme', dugmeYazi:'--dugme-yazi', kenar:'--kenar' };
+      for (const ad in cssAdlari) alan.style.setProperty(cssAdlari[ad], masal.renkler[ad]);
+      alan.setAttribute('data-desen', masal.desen);
+      alan.setAttribute('data-yerlesim', masal.yerlesim);
+      alan.setAttribute('data-cerceve', masal.cerceve);
+    }
+
+    // Tam metni güvenli şekilde ayrı paragraflara böler. Boşsa yer tutucu gösterir.
+    function metniYaz(masal) {
+      const alan = document.getElementById('masal-metni');
+      alan.innerHTML = '';
+      if (masal.metin.trim() === '') {
+        const bos = document.createElement('div');
+        bos.className = 'bos-metin';
+        bos.textContent = 'Masalın tam metni bu alana gelecek…';
+        alan.appendChild(bos);
+      } else {
+        const paragraflar = masal.metin.trim().split(/\n\s*\n/);
+        paragraflar.forEach(function(paragraf) {
+          const p = document.createElement('p');
+          p.textContent = paragraf.trim();
+          alan.appendChild(p);
+        });
+      }
+    }
+
+    // Yalnızca .masal-metni yazı boyutunu 16–32px arasında 2'şer değiştirir.
+    function yaziBoyutunuDegistir(fark) {
+      yaziBoyutu = Math.max(16, Math.min(32, yaziBoyutu + fark));
+      document.getElementById('masal-metni').style.fontSize = yaziBoyutu + 'px';
+      document.getElementById('boyut-goster').textContent = yaziBoyutu + 'px';
+      document.getElementById('boyut-kucult').disabled = yaziBoyutu === 16;
+      document.getElementById('boyut-buyut').disabled = yaziBoyutu === 32;
+    }
+
+    // Önceki/sonraki masalı ve sekiz kısa yolu üretir; sıra sonunda başa döner.
+    function gecisleriYaz(masal) {
+      const index = masallar.indexOf(masal);
+      const onceki = masallar[(index - 1 + masallar.length) % masallar.length];
+      const sonraki = masallar[(index + 1) % masallar.length];
+      document.getElementById('onceki-masal').setAttribute('data-gecis', onceki.id);
+      document.getElementById('onceki-ad').textContent = onceki.ad;
+      document.getElementById('sonraki-masal').setAttribute('data-gecis', sonraki.id);
+      document.getElementById('sonraki-ad').textContent = sonraki.ad;
+      const liste = document.getElementById('mini-masallar');
+      liste.innerHTML = '';
+      masallar.forEach(function(m, i) {
+        const dugme = document.createElement('button');
+        dugme.className = 'mini-dugme';
+        dugme.type = 'button';
+        dugme.textContent = (i + 1) + '. ' + m.ad;
+        dugme.setAttribute('data-gecis', m.id);
+        if (m.id === masal.id) dugme.setAttribute('aria-current', 'true');
+        liste.appendChild(dugme);
+      });
+    }
+
+    // Bir masalın bütün bilgilerini gösterir ve başlığa klavye odağı verir.
+    function masaliGoster(masal) {
+      const anaSayfa = document.getElementById('ana-sayfa');
+      const okuma = document.getElementById('masal-gorunumu');
+      if (!anaSayfa.hidden) anaKaydirma = window.scrollY;
+      aktifMasalId = masal.id;
+      temayiUygula(masal);
+      document.getElementById('masal-baslik').textContent = masal.ad;
+      document.getElementById('masal-giris').textContent = masal.kisaTanitim;
+      const etiketler = [];
+      masal.kategoriler.forEach(function(k) { etiketler.push(kategoriler[k]); });
+      document.getElementById('masal-ust-etiket').textContent = etiketler.join(' · ');
+      document.getElementById('buyuk-gorsel').innerHTML = gorselHtml(masal);
+      document.getElementById('masal-ozet').textContent = masal.ozet;
+      document.getElementById('masal-kaynak-link').href = masal.kaynak;
+      const not = document.getElementById('masal-yazar-notu');
+      not.textContent = masal.yazarNotu;
+      not.hidden = masal.yazarNotu === '';
+      document.getElementById('metin-turu').textContent = masal.metinTuru + ' · Kaynaktaki olay örgüsü temel alınmıştır; özgün kaynağın birebir metni değildir.';
+      metniYaz(masal);
+      gecisleriYaz(masal);
+      yaziBoyutu = 20;
+      yaziBoyutunuDegistir(0);
+      anaSayfa.hidden = true;
+      okuma.hidden = false;
+      document.title = masal.ad + ' | Bir Masal, Bin Hayal';
+      window.scrollTo(0, 0);
+      document.getElementById('masal-baslik').focus({ preventScroll: true });
+    }
+
+    // Ana sayfayı eski kaydırma konumuyla gösterir; son kart yeniden odaklanır.
+    function anaSayfayiGoster() {
+      const okuma = document.getElementById('masal-gorunumu');
+      if (okuma.hidden) return;
+      okuma.hidden = true;
+      document.getElementById('ana-sayfa').hidden = false;
+      aktifMasalId = '';
+      document.title = 'Bir Masal, Bin Hayal | Dijital Masal Arşivi';
+      window.scrollTo(0, anaKaydirma);
+      const kart = document.getElementById('kart-' + sonKartId);
+      if (kart) kart.focus({ preventScroll: true });
+    }
+
+    // Adres çubuğundaki #masal-... bilgisini okuyarak doğru görünümü seçer.
+    function adresiOku() {
+      const eslesme = location.hash.match(/^#masal-(.+)$/);
+      const masal = eslesme ? masalBul(decodeURIComponent(eslesme[1])) : null;
+      if (masal) masaliGoster(masal);
+      else anaSayfayiGoster();
+    }
+
+    // Kaynakçayı sekiz masalın kaynak adreslerinden oluşturur.
+    function kaynakcayiYaz() {
+      const liste = document.getElementById('kaynakca-listesi');
+      liste.innerHTML = '';
+      masallar.forEach(function(masal) {
+        const li = document.createElement('li');
+        li.appendChild(document.createTextNode(masal.ad + '. Masal Oku. '));
+        const link = document.createElement('a');
+        link.href = masal.kaynak;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.textContent = masal.kaynak;
+        li.appendChild(link);
+        li.appendChild(document.createTextNode(' (Erişim tarihi: ' + erisimTarihi + ')'));
+        liste.appendChild(li);
+      });
+    }
+
+    // Olay delegasyonu: Bütün kartlar için tek tıklama dinleyicisi yeterlidir.
+    document.getElementById('masal-kartlari').addEventListener('click', function(olay) {
+      const tiklanan = olay.target.closest('[data-masal]');
+      if (!tiklanan) return;
+      sonKartId = tiklanan.getAttribute('data-masal');
+      location.hash = 'masal-' + sonKartId;
+    });
+    // Kartın kendisi de Enter/Boşluk tuşuyla açılabilir.
+    document.getElementById('masal-kartlari').addEventListener('keydown', function(olay) {
+      const kart = olay.target.closest('.masal-karti');
+      if (kart && olay.target === kart && (olay.key === 'Enter' || olay.key === ' ')) {
+        olay.preventDefault();
+        sonKartId = kart.getAttribute('data-masal');
+        location.hash = 'masal-' + sonKartId;
+      }
+    });
+    document.getElementById('masal-arama').addEventListener('input', listeyiGuncelle);
+    document.getElementById('kategori-dugmeleri').addEventListener('click', function(olay) {
+      const dugme = olay.target.closest('[data-kategori]');
+      if (!dugme) return;
+      seciliKategori = dugme.getAttribute('data-kategori');
+      kategorileriCiz();
+      listeyiGuncelle();
+    });
+    document.getElementById('masal-gorunumu').addEventListener('click', function(olay) {
+      if (olay.target.closest('[data-eve]')) location.hash = '';
+    });
+    document.getElementById('masal-gecisleri').addEventListener('click', function(olay) {
+      const dugme = olay.target.closest('[data-gecis]');
+      if (dugme) location.hash = 'masal-' + dugme.getAttribute('data-gecis');
+    });
+    document.getElementById('boyut-kucult').addEventListener('click', function() { yaziBoyutunuDegistir(-2); });
+    document.getElementById('boyut-buyut').addEventListener('click', function() { yaziBoyutunuDegistir(2); });
+    // Özet düzenlemeleri sayfa açık kaldıkça dizide saklanır; HTML dosyasına yazılmaz.
+    document.getElementById('masal-ozet').addEventListener('input', function() {
+      const masal = masalBul(aktifMasalId);
+      if (masal) masal.ozet = this.textContent;
+    });
+    // Safari geri/ileri tuşları dahil tüm görünüm değişimlerinin kaynağı hash'tir.
+    window.addEventListener('hashchange', adresiOku);
+    // Sayfa ilk açılırken kartları ve kaynakçayı hazırlar, sonra mevcut adresi okur.
+    kategorileriCiz();
+    kartlariCiz();
+    kaynakcayiYaz();
+    adresiOku();
+  </script>
+</body>
+</html>
+<!--
+GÖRSEL VE METİN DÜZENLEME KILAVUZU (BU YORUM HTML'İN SONUNDADIR)
+1. Dosyada Ctrl+F veya Command+F ile 'const masallar = [' ifadesini bul.
+2. Her nesnenin başında // 1 — YÜREK ANA gibi hangi masal olduğu yazılıdır.
+3. O masalın 'metin: `...' alanında hazır özgün yeniden anlatım bulunmaktadır.
+   İstersen iki ters tırnak arasındaki metni kendi metninle değiştirebilirsin.
+   Örnek: metin: `Bir varmış, bir yokmuş.
+
+   Kahraman ormanın yolunu tutmuş.`
+   Boş satır yeni paragraf oluşturur. Sekiz masalın metni bu sürümde DOLUDUR.
+4. 'ozet: ...' alanını değiştirirsen okuma sayfasındaki özet değişir.
+   Okuma sayfasında özetin üzerine tıklayarak da geçici düzenleme yapabilirsin.
+5. 'imageData: \'\'' alanına kendi resminin data URI'sini yapıştırabilirsin.
+   Örnek: imageData: 'data:image/jpeg;base64,/9j/4AAQ...'
+   Doluysa kart ve büyük görselde senin resmin gösterilir; boşsa SVG çizimi görünür.
+6. Mac Terminal: base64 -i resim.png | tr -d '\n' | pbcopy
+   Panodaki metnin başına 'data:image/png;base64,' ekle.
+7. Yerleşimi, çerçeveyi, deseni ve renkleri kendi masal nesnesinden değiştirebilirsin.
+8. Kodda değişiklikten sonra dosyayı kaydet; Safari'de Command+R ile yenile.
+-->
