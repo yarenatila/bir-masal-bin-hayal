@@ -1,0 +1,434 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else
+  \usepackage{fontspec}
+\fi
+
+\usepackage[turkish,shorthands=off]{babel}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{amssymb}
+\usepackage{caption}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+
+\onehalfspacing
+\setlength{\headheight}{16pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\setlist{itemsep=2pt,topsep=4pt}
+\setlength{\emergencystretch}{2em}
+
+\definecolor{ana}{HTML}{14325C}
+\definecolor{acik}{HTML}{EEF2F8}
+
+\hypersetup{colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{acik},
+  frame=single,
+  rulecolor=\color{ana},
+  breaklines=true,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Bir Masal, Bin Hayal}
+\fancyhead[R]{Vize Raporu}
+\fancyfoot[C]{\thepage}
+
+% KAPAK BİLGİLERİ
+\newcommand{\universite}{İstanbul Medipol Üniversitesi / Görsel İletişim Tasarımı}
+\newcommand{\dersadi}{Programlamaya Giriş}
+\newcommand{\hocaadi}{Meral Şentürk}
+\newcommand{\ogrenciadi}{Yaren Atila}
+\newcommand{\ogrencino}{86240044}
+\newcommand{\projeadi}{Bir Masal, Bin Hayal}
+\newcommand{\githublink}{\url{https://github.com/yarenatila/bir-masal-bin-hayal}}
+
+% YOUTUBE: Kullanıcının verdiği bilgilerle dolduruldu.
+\newcommand{\videobasligi}{Programlamaya Giriş I}
+\newcommand{\youtubeadres}{https://youtu.be/TijPA6AlrSo}
+\newcommand{\videosuresi}{17 dakika}
+\newcommand{\videogorunurlugu}{Liste Dışı (Listelenmemiş) -- bağlantıya sahip herkes izleyebilir}
+\newcommand{\youtubelink}{\url{https://youtu.be/TijPA6AlrSo}}
+
+\newcommand{\dersgorseli}[1]{%
+  \IfFileExists{#1}{%
+    \includegraphics[width=5.5cm,height=3.8cm,keepaspectratio]{#1}%
+  }{\textit{Görsel dosyası yüklenmeli.}}%
+}
+\newcommand{\derskatilimi}{\par $\boxtimes$ Ders içinde katılım sergiledim.}
+
+\begin{document}
+
+% ====================================================
+% KAPAK
+% ====================================================
+\begin{titlepage}
+\centering
+\vspace*{0.2cm}
+{\large \universite \par}
+\vspace{1cm}
+{\Huge\bfseries\color{ana} \projeadi \par}
+\vspace{0.4cm}
+{\Large Türk Masalları Derlemesi Web Sayfası \par}
+{\large Vize Raporu \par}
+\vspace{1cm}
+{\large \textbf{Ders:} \dersadi \par}
+{\large \textbf{Öğretim Üyesi:} \hocaadi \par}
+\vspace{1.2cm}
+{\large \textbf{Hazırlayan:} \ogrenciadi \par}
+{\large \textbf{Öğrenci No:} \ogrencino \par}
+\vspace{1cm}
+\fbox{\parbox{0.88\linewidth}{%
+\centering\vspace{6pt}
+{\large\bfseries Proje Bağlantıları}\\[8pt]
+\textbf{GitHub deposu:}\\
+\githublink\\[8pt]
+\textbf{YouTube sunum videosu:}\\
+\youtubelink
+\par\vspace{6pt}
+}}
+\vfill
+{\large 30 Ekim 2026 \par}
+\end{titlepage}
+
+\tableofcontents
+\clearpage
+
+\section{Giriş}
+\subsection{Proje Özeti}
+Bu proje, sekiz masalı tek bir HTML dosyasında bir araya getiren bir dijital okuma arşividir. Amaç, masallara görsel bir liste üzerinden ulaşmayı ve rahat bir okuma deneyimi sunmayı sağlamaktır. Kullanıcı masal adını arayabilir veya tematik kategorilerden birini seçebilir. Her masal farklı bir renk paleti, motif ve görsel çerçeve ile sunulur. CSS kuralları \texttt{style}, JavaScript kodları \texttt{script} etiketi içinde tutulur. SVG çizimleri de dosyaya gömülüdür; temel içerik ve işlevler için harici dosya gerekmemektedir. Raporda içerik seçimi, tasarım kararları, kod yapısı ve ders çalışmalarına ait ekran görüntüleri açıklanmıştır.
+
+Projenin 17 dakikalık sunum videosu YouTube'a Liste Dışı (Listelenmemiş) görünürlük ayarıyla yüklenmiştir. Videoya bağlantıya sahip olan herkes erişebilir.
+
+\subsection{Gereksinimlerin Karşılanması}
+\begin{center}
+\rowcolors{2}{acik}{white}
+\begin{tabular}{@{}p{10.5cm}c@{}}
+\toprule
+\rowcolor{ana}
+\textcolor{white}{\textbf{Gereksinim}} & \textcolor{white}{\textbf{Durum}}\\
+\midrule
+Masal sayısı 8--12 arasında (8 masal) & $\boxtimes$\\
+Tek HTML dosyası & $\boxtimes$\\
+Stil kodları içsel (\texttt{<style>} içinde) & $\boxtimes$\\
+Betik kodları içsel (\texttt{<script>} içinde) & $\boxtimes$\\
+İnternetsiz açılıp çalışıyor & $\boxtimes$\\
+JavaScript sayfada anlamlı bir işlev görüyor & $\boxtimes$\\
+Masal metinleri kaynaklara dayalı yeniden anlatıldı & $\boxtimes$\\
+Sayfa telefonda da düzgün görünüyor & $\boxtimes$\\
+17 dakikalık YouTube sunumu eklendi & $\boxtimes$\\
+Video Liste Dışı olarak ayarlandı & $\boxtimes$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Masalların Seçimi}
+\begin{longtable}{@{}cp{3.6cm}p{2.8cm}p{5.8cm}@{}}
+\toprule
+\textbf{No} & \textbf{Masal} & \textbf{Tür} & \textbf{Seçilme nedeni}\\
+\midrule
+\endhead
+1 & Yürek Ana & Masal / yeniden anlatım & Şefkat ve dayanışma temasını öne çıkarması.\\
+2 & Gökten Düşen Üç Elma & Masal / yeniden anlatım & Gökyüzü ve hayal gücü temasına uygunluğu.\\
+3 & Kırmızı Uçurtma Masalı & Masal / yeniden anlatım & Uçurtma üzerinden görsel ve tematik çeşitlilik sağlaması.\\
+4 & Ayşecik ile Yasemin Sultan & Masal / yeniden anlatım & Karakterler ve masalsı olaylar aracılığıyla çeşitlilik sunması.\\
+5 & Dipsiz Kuyu & Masal / yeniden anlatım & Merak ve gizem duygusunu desteklemesi.\\
+6 & Sihirli Nar & Masal / yeniden anlatım & Büyülü nesne motifiyle masal atmosferini güçlendirmesi.\\
+7 & Vadideki Nine & Masal / yeniden anlatım & Doğa, yaşlılık ve saygı temalarını birleştirmesi.\\
+8 & Kıymetli Tuz & Masal / yeniden anlatım & Sevgi ve gündelik değerler üzerine düşündürmesi.\\
+\bottomrule
+\end{longtable}
+
+\section{Tasarım Kararları}
+\subsection{Konuya Uygunluk}
+Krem kâğıt zemin, mürdüm başlıklar, kilim bordürleri ve geometrik motifler masal kitabını çağrıştıran bir atmosfer oluşturur. Dosyaya gömülü SVG çizimleri her masalı ayrı bir görsel kimlikle tanıtır. Masal ekranında renk, desen, çerçeve ve yerleşim birlikte değişirken gezinme düğmeleri aynı mantıkla çalışır.
+
+\subsection{Renk Paleti ve Yazı Tipi}
+\begin{center}
+\rowcolors{2}{acik}{white}
+\begin{tabular}{@{}p{2.8cm}p{2.5cm}p{8cm}@{}}
+\toprule
+\rowcolor{ana}
+\textcolor{white}{\textbf{Ad}} & \textcolor{white}{\textbf{Kod}} & \textcolor{white}{\textbf{Nerede / neden kullandınız?}}\\
+\midrule
+Krem & \texttt{\#F8F1E3} & Ana sayfa zemini; sıcak bir kâğıt hissi.\\
+Mürdüm & \texttt{\#4B1D3F} & Başlıklar, seçili kategoriler ve kaynakça.\\
+Kiremit & \texttt{\#B5573B} & Vurgu ve dekoratif ayrıntılar.\\
+Sistem yazı tipleri & -- & Başlık ve metinde Iowan, Palatino ve Georgia serif ailesi; arayüzde sistem sans serif ailesi. Cihazda bulunan uygun yazı tipi kullanılır.\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Okunabilirlik, Gezinme ve Duyarlı Tasarım}
+\begin{itemize}
+\item \textbf{Okunabilirlik:} Masal metni varsayılan 20 px, satır yüksekliği 1.85 ve en fazla 66ch genişliktedir. Boyut 16--32 px arasında değiştirilebilir.
+\item \textbf{Gezinme:} Arama, kategori düğmeleri, masal kartları, önceki/sonraki düğmeleri ve kısa yol listesi kullanılır.
+\item \textbf{Duyarlı tasarım:} Kartlar CSS Grid ile yerleşir. 750 px altında okuma başlığı ve resim dikey sıralanır; 480 px altında kenar boşlukları daraltılır.
+\item \textbf{Tutarlılık:} Ortak CSS değişkenleri, düğme ölçüleri ve başlık hiyerarşisi tutarlılık sağlar.
+\end{itemize}
+
+\subsection{Ekran Görüntüleri}
+Ana sayfa, masal okuma ekranı ve telefon görünümü bu bölümde sunulmaktadır.
+
+% Bu dosyalar Overleaf projesine eklenmelidir:
+% masal_ana_sayfa.png, masal_okuma.png, masal_mobil.png
+\IfFileExists{masal_ana_sayfa.png}{%
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\linewidth,height=8cm,keepaspectratio]{masal_ana_sayfa.png}
+\caption{Ana sayfa, arama alanı ve masal kartları.}
+\end{figure}
+}{}
+
+\IfFileExists{masal_okuma.png}{%
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\linewidth,height=8cm,keepaspectratio]{masal_okuma.png}
+\caption{Masal okuma ekranı ve metin boyutu kontrolleri.}
+\end{figure}
+}{}
+
+\IfFileExists{masal_mobil.png}{%
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.42\linewidth,height=10cm,keepaspectratio]{masal_mobil.png}
+\caption{Projenin telefon görünümü.}
+\end{figure}
+}{}
+\clearpage
+
+\section{Gerçekleştirme}
+\subsection{HTML Yapısı}
+Ana sayfa kapak, arama alanı, kategori düğmeleri, masal kartları ve kaynakçadan oluşur. İkinci görünüm masal başlığını, görselini, özetini, tam metnini ve gezinme kontrollerini içerir. Kartlar JavaScript ile \texttt{article} öğeleri olarak üretilir. \texttt{hidden} özelliği iki görünüm arasında geçişi sağlar; ayrı bir HTML sayfası açılmaz.
+
+\subsection{İçsel CSS}
+Renkler ve yazı tipleri \texttt{:root} değişkenlerinde tanımlanmıştır. Grid kart düzenini, Flex düğme gruplarını yönetir. Media query kuralları küçük ekranları düzenler. Masal nesnesindeki renkler \texttt{style.setProperty()} ile okuma ekranına aktarılır.
+
+\begin{lstlisting}[caption={İçsel CSS'ten önemli bir bölüm}]
+.kartlar {
+  display: grid;
+  grid-template-columns:
+    repeat(auto-fill, minmax(250px, 1fr));
+  gap: 22px;
+}
+\end{lstlisting}
+
+\subsection{İçsel JavaScript}
+Masallar, \texttt{masallar} adlı nesne dizisinde tutulur. Her nesnede kimlik, ad, özet, metin, kaynak, kategori ve tasarım bilgileri bulunur. \texttt{kartlariCiz()} arama ve kategori sonucunu üretir; \texttt{temayiUygula()} seçilen masalın görünümünü belirler. \texttt{metniYaz()} metni paragraflara böler. \texttt{addEventListener()} ile arama ve tıklama olayları dinlenir. \texttt{location.hash} ve \texttt{hashchange}, görünüm değişimini ve tarayıcı geri/ileri hareketlerini yönetir.
+
+\begin{lstlisting}[caption={İçsel JavaScript'ten önemli bir bölüm}]
+function yaziBoyutunuDegistir(fark) {
+  yaziBoyutu = Math.max(
+    16,
+    Math.min(32, yaziBoyutu + fark)
+  );
+
+  document.getElementById('masal-metni')
+    .style.fontSize = yaziBoyutu + 'px';
+
+  document.getElementById('boyut-goster')
+    .textContent = yaziBoyutu + 'px';
+
+  document.getElementById('boyut-kucult')
+    .disabled = yaziBoyutu === 16;
+
+  document.getElementById('boyut-buyut')
+    .disabled = yaziBoyutu === 32;
+}
+\end{lstlisting}
+
+\subsection{Sayfanın Özellikleri}
+Arama Türkçe harfleri sadeleştirir; kategori ve ad filtresi birlikte çalışır. Sonuç bulunamazsa açıklama gösterilir. Kartlar Enter ve boşluk tuşuyla açılabilir. Ana sayfaya dönüşte kaydırma konumu ve kart odağı geri getirilir. Özet düzenlemesi yalnızca açık oturumdaki diziyi değiştirir; dosyaya veya kalıcı depolamaya kaydedilmez. Kaynak bağlantılarını açmak internet gerektirir.
+
+\section{Yapay Zekâ Kullanımı}
+\begin{longtable}{@{}p{2cm}p{3.2cm}p{5.2cm}p{2.6cm}@{}}
+\toprule
+\textbf{Araç} & \textbf{Ne için kullandınız?} & \textbf{İstem özeti} & \textbf{Sayfada nerede?}\\
+\midrule
+\endhead
+ChatGPT & Rapor hazırlama & HTML dosyası ve ders görsellerine göre raporun hazırlanması ve teknik açıklamaların düzenlenmesi & Bu rapor\\
+ChatGPT & Web sitesinin geliştirilmesi & Türk masalları için tek dosyalı, içsel CSS ve JavaScript içeren web sitesi hazırlama ve düzenleme & Masal web sitesi\\
+
+\end{longtable}
+
+\subsection{Anladığım ve Kendim Yaptığım Kısımlar}
+Masal web sitesini geliştirirken ChatGPT desteğinden yararlandım. HTML, içerik alanlarını ve düğmeleri tanımlar; CSS bu öğelerin görünümünü düzenler; JavaScript arama, filtreleme ve masal geçişlerini gerçekleştirir. Masal bilgileri bir dizi içinde tutulur ve seçilen masalın bilgileri okuma alanına aktarılır. Ders içi HTML, CSS ve JavaScript çalışmalarımın ekran görüntülerini katkılar bölümünde sundum.
+
+\section{Haftalık Katkılar}
+Ders içi çalışmalarım tarih sırasıyla aşağıda sunulmuştur. Açıklamalarda kullandığım kod yapıları, kullanım amaçları ve sayfanın davranışına etkileri belirtilmiştir.
+
+\begin{longtable}{@{}p{2.3cm}p{5.9cm}p{5.9cm}@{}}
+\toprule
+\textbf{Tarih} & \textbf{Yapılan çalışma} & \textbf{Ekran görüntüleri}\\
+\midrule
+\endhead
+
+\textbf{23 Eylül 2026} &
+\textbf{HTML etiketleri ve CSS ile sayfa düzeni}
+\par
+WorldWideWeb sayfasında başlıkları \texttt{h1/h2}, paragrafları \texttt{p}, listeyi \texttt{ul/li} etiketleriyle düzenledim. \texttt{href="\#..."} bağlantılarını bölüm \texttt{id} değerleriyle eşleştirerek sayfa içinde gezinmeyi sağladım. CSS'te \texttt{background}, \texttt{max-width} ve \texttt{margin} kullanarak krem zeminli, genişliği sınırlandırılmış ve ortalanmış bir okuma alanı oluşturdum.
+\derskatilimi
+& \dersgorseli{calisma1.jpeg}\\
+& HTML ve CSS uygulaması -- devam & \dersgorseli{calisma1_ek1.png}\\
+\midrule
+
+\textbf{30 Eylül 2026} &
+\textbf{HTML tablo yapısı ve CSS seçicileri}
+\par
+Spider-Man sayfasındaki film bilgilerini \texttt{table}, \texttt{tr}, \texttt{th} ve \texttt{td} etiketleriyle tabloya dönüştürdüm. CSS seçicileriyle başlık renklerini, hücre kenarlıklarını ve \texttt{padding} değerlerini belirleyerek bilgilerin ayrışmasını sağladım. \texttt{img} etiketinde \texttt{width} ile görsel boyutunu, \texttt{alt} ile metinsel açıklamasını tanımladım.
+\derskatilimi
+& \dersgorseli{calisma2.png}\\
+& HTML tablo ve görsel uygulaması -- devam & \dersgorseli{calisma2_ek1.jpeg}\\
+& HTML tablo ve görsel uygulaması -- devam & \dersgorseli{calisma2_ek2.png}\\
+\midrule
+
+\textbf{30 Eylül 2026} &
+\textbf{JavaScript: onclick ve alert}
+\par
+\texttt{button} etiketine \texttt{onclick="alert('Merhaba!')"} ekleyerek tıklama olayını JavaScript'e bağladım. Düğmeye basıldığında \texttt{alert()} iletişim kutusunu açtığı için kullanıcı eylemine doğrudan geri bildirim verdim.
+\derskatilimi
+& \dersgorseli{calisma3.jpeg}\\
+\midrule
+
+\textbf{7 Ekim 2026} &
+\textbf{DOM seçimi ve kullanıcı girdisi}
+\par
+\texttt{getElementById()} ile giriş alanını, düğmeyi ve çıktı paragrafını seçtim. \texttt{addEventListener('click', ...)} içinde girişin \texttt{value} değerini okuyup boş olup olmadığını \texttt{if} ile kontrol ettim. Girilen adı selamlama metniyle birleştirip \texttt{textContent} üzerinden paragrafa aktararak sayfa yenilenmeden çıktı ürettim.
+\derskatilimi
+& \dersgorseli{calisma4.jpeg}\\
+\midrule
+
+\textbf{7 Ekim 2026} &
+\textbf{Değişken ve sayaç güncelleme}
+\par
+\texttt{let sayac = 0} ile değiştirilebilir bir sayaç tanımladım. Düğmelerin tıklama olaylarında \texttt{sayac += 10} ve \texttt{sayac -= 10} işlemleriyle değeri artırıp azalttım. Her işlemden sonra \texttt{textContent} değerini güncelledim; ikinci düğme kodda sıfırlama yerine 10 azaltma işlemi yapmaktadır.
+\derskatilimi
+& \dersgorseli{calisma5.jpeg}\\
+\midrule
+
+\textbf{14 Ekim 2026} &
+\textbf{dataset ve koşullu eşleştirme}
+\par
+Kart renklerini \texttt{data-renk} özelliğinde tutup \texttt{dataset.renk} ile okudum; seçilen kartları \texttt{acikKartlar} dizisine ekledim. İki kart açılınca renklerini \texttt{===} ile karşılaştırıp \texttt{setTimeout()} ile sonucu kısa bir gecikmeyle uyguladım. Eşleşen kartları \texttt{classList.add()} ile gizledim, eşleşmeyenleri kapalı renge döndürdüm.
+\derskatilimi
+& \dersgorseli{calisma6.jpeg}\\
+\midrule
+
+\textbf{14 Ekim 2026} &
+\textbf{href ile adres yönlendirme}
+\par
+\texttt{a} etiketinin \texttt{href} özelliğine TikTok adresini yazarak doğrudan bağlantı oluşturdum. Aynı yönlendirmeyi düğmeyle yapmak için tıklama dinleyicisinde \texttt{window.location.href} değerini değiştirdim; bu atama tarayıcıyı belirtilen adrese yönlendirir.
+\derskatilimi
+& \dersgorseli{calisma5_ek1.jpeg}\\
+\midrule
+
+\textbf{21 Ekim 2026} &
+\textbf{Anlamsal HTML ve bölüm kimlikleri}
+\par
+The Cure sayfasında \texttt{header}, \texttt{nav}, \texttt{main}, \texttt{section} ve \texttt{article} etiketleriyle içerik hiyerarşisini kurdum. Menüdeki \texttt{href="\#..."} değerlerini bölüm kimlikleriyle eşleştirerek aynı sayfadaki içeriklere geçiş sağladım. CSS'te kenarlık ve iç boşluk tanımlayarak bölümleri ayırdım, albüm bilgilerini tabloyla düzenledim.
+\derskatilimi
+& \dersgorseli{calisma7.png}\\
+& Anlamsal HTML -- devam & \dersgorseli{calisma7_ek1.png}\\
+\midrule
+
+\textbf{21 Ekim 2026} &
+\textbf{Bootstrap ile duyarlı yerleşim}
+\par
+The Cure sayfasının diğer sürümünde Bootstrap'i ekleyip \texttt{container}, \texttt{row} ve \texttt{col-12 col-md-4} sınıflarıyla ekran genişliğine göre değişen sütunlar oluşturdum. \texttt{navbar-expand-lg} ile menünün geniş ekranda yatay, dar ekranda açılır düzende sunulmasını tanımladım. \texttt{card} ve \texttt{table-responsive} sınıflarıyla içerik kutularını ve tablo alanını düzenledim.
+\derskatilimi
+& \dersgorseli{calisma8.jpeg}\\
+& Bootstrap -- devam & \dersgorseli{calisma8_ek1.jpeg}\\
+\midrule
+
+\textbf{21 Ekim 2026} &
+\textbf{DOM stili ve if/else koşulu}
+\par
+\texttt{getElementById()} ile kutuyu ve düğmeyi seçip \texttt{onclick} özelliğine bir fonksiyon atadım. Fonksiyonda \texttt{style.background} değerini \texttt{if/else} ile kontrol ederek griyse sarıya, diğer durumda griye çevirdim. Böylece aynı düğme her tıklamada mevcut duruma göre farklı bir renk uygular.
+\derskatilimi
+& \dersgorseli{calisma8_ek2.png}\\
+\bottomrule
+\end{longtable}
+
+\section{Test ve Değerlendirme}
+\begin{center}
+\rowcolors{2}{acik}{white}
+\begin{tabular}{@{}p{6cm}p{3.4cm}p{3.4cm}@{}}
+\toprule
+\rowcolor{ana}
+\textcolor{white}{\textbf{Özellik}} & \textcolor{white}{\textbf{Bilgisayar}} & \textcolor{white}{\textbf{Telefon}}\\
+\midrule
+Arama ve filtreleme & Çalışıyor & Çalışıyor\\
+Masal açma ve geçişler & Çalışıyor & Çalışıyor\\
+Yazı boyutu ve mobil düzen & Çalışıyor & Çalışıyor\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Arama, kategori filtreleme, masal açma ve önceki/sonraki masala geçiş işlevlerini bilgisayar ve telefon üzerinde kontrol ettim. Yazı boyutu düğmelerinin metni belirlenen sınırlar içinde değiştirdiğini ve dar ekranlarda yerleşimin yeniden düzenlendiğini gözlemledim. Çevrimdışı kullanımda temel içerik ve etkileşimler dosya içinden çalışmaktadır; dış kaynak bağlantıları internet bağlantısı gerektirmektedir.
+
+\section{Sunum Videosu}
+Projenin sunum videosu YouTube platformuna yüklenmiştir. Video 17 dakika sürmektedir ve öngörülen 12--18 dakika aralığına uygundur. Görünürlük ayarı \textbf{Liste Dışı (Listelenmemiş)} olarak seçilmiştir. Bu ayarda video YouTube arama sonuçlarında listelenmez ancak bağlantıya sahip olan herkes tarafından izlenebilir.
+
+Sunum boyunca kameram açık ve yüzüm görünür durumdadır. Ses kaydı açıktır. Bağlantıyı gizli tarayıcı penceresinde açarak videonun oynatıldığını kontrol ettim. Videonun işlenmesi tamamlanmıştır. Videoyu baştan sona izleyerek ses ve kameranın sunum boyunca çalıştığını kontrol ettim.
+
+\begin{center}
+\begin{tabular}{@{}lp{9cm}@{}}
+\textbf{Video başlığı:} & \videobasligi\\
+\textbf{Video süresi:} & \videosuresi\\
+\textbf{Görünürlük:} & \videogorunurlugu\\
+\textbf{Kamera:} & Açık; sunum boyunca yüzüm görünüyor\\
+\textbf{Ses:} & Açık; ses kontrolü yapıldı\\
+\textbf{Gizli pencere testi:} & Başarılı; video oynatılıyor\\
+\textbf{Bağlantı:} & \youtubelink\\
+\end{tabular}
+\end{center}
+
+\subsection{Video Kontrol Listesi}
+\begin{itemize}[label={}]
+\item $\boxtimes$ Süre 12--18 dakika aralığında (17 dakika).
+\item $\boxtimes$ Sunum boyunca kameram açık, yüzüm görünüyor.
+\item $\boxtimes$ Görünürlük Liste Dışı (Listelenmemiş); Özel değil.
+\item $\boxtimes$ Bağlantıya sahip olan herkes videoyu izleyebilir.
+\item $\boxtimes$ Bağlantıyı gizli pencerede açtım, video oynuyor.
+\item $\boxtimes$ YouTube videoyu işlemeyi bitirdi.
+\item $\boxtimes$ Videoyu baştan sona izledim; ses ve kamera tüm sunumda var.
+\item $\boxtimes$ Kapaktaki bağlantı ile bu bölümdeki bağlantı aynı.
+\end{itemize}
+
+\section{Sonuç ve Kendi Değerlendirmem}
+Proje; HTML içerik yapısı, CSS ile görsel düzenleme ve JavaScript etkileşimlerini tek dosyada birleştirmektedir. Masalları veri dizisinde tutmak, kart ve okuma görünümünü aynı içerikten üretmeyi sağlar. Renk ve motif değişimleri masallar arasında görsel çeşitlilik oluşturur. Dosyaya gömülü çizimler harici görsel ihtiyacını azaltır. Kod incelemesinde özet değişikliklerinin kalıcı olmadığı görülmüştür. Gelecekte kalıcı yer imi ve okuma ilerlemesi eklenebilir. Proje, içerik, görsel düzen ve etkileşim arasındaki ilişkinin tek bir dosya üzerinden incelenmesini sağlamıştır.
+
+17 dakikalık YouTube sunumuyla projenin açıklanması da raporun teslim sürecini tamamlamaktadır. Video Liste Dışı olarak paylaşılmış ve bağlantı raporun hem kapağına hem de video bölümüne eklenmiştir.
+
+\section{Kaynakça}
+\begin{thebibliography}{9}
+\bibitem{k1} Masal Oku. Yürek Ana. \url{https://www.masaloku.net/yurek-ana/}. Erişim tarihi: 28 Ekim 2026.
+\bibitem{k2} Masal Oku. Gökten Düşen Üç Elma. \url{https://www.masaloku.net/gokten-dusen-uc-elma/}. Erişim tarihi: 28 Ekim 2026.
+\bibitem{k3} Masal Oku. Kırmızı Uçurtma Masalı. \url{https://www.masaloku.net/kirmizi-ucurtma/}. Erişim tarihi: 28 Ekim 2026.
+\bibitem{k4} Masal Oku. Ayşecik ile Yasemin Sultan. \url{https://www.masaloku.net/aysecik-ile-yasemin-sultan/}. Erişim tarihi: 28 Ekim 2026.
+\bibitem{k5} Masal Oku. Dipsiz Kuyu. \url{https://www.masaloku.net/dipsiz-kuyu-masali/}. Erişim tarihi: 28 Ekim 2026.
+\bibitem{k6} Masal Oku. Sihirli Nar. \url{https://www.masaloku.net/sihirli-nar/}. Erişim tarihi: 28 Ekim 2026.
+\bibitem{k7} Masal Oku. Vadideki Nine. \url{https://www.masaloku.net/vadideki-nine/}. Erişim tarihi: 28 Ekim 2026.
+\bibitem{k8} Masal Oku. Kıymetli Tuz. \url{https://www.masaloku.net/kiymetli-tuz/}. Erişim tarihi: 28 Ekim 2026.
+\end{thebibliography}
+
+\end{document}
